@@ -1,0 +1,10 @@
+commit-msg:
+  run: bunx commitlint --edit
+
+pre-commit:
+  commands:
+    composer-lint:
+      run: composer lint
+
+pre-push:
+  run: composer test

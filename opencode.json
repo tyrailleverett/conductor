@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "formatter": {
+    "ultracite": {
+      "command": ["bunx", "ultracite", "fix", "$FILE"],
+      "extensions": [
+        ".ts",
+        ".tsx",
+        ".js",
+        ".jsx",
+        ".css",
+        ".scss",
+        ".json",
+        ".md"
+      ]
+    },
+    "duster": {
+      "command": ["./vendor/bin/duster", "fix", "$FILE"],
+      "extensions": [".php"]
+    },
+    "rector": {
+      "command": [
+        "./vendor/bin/rector",
+        "process",
+        "$FILE",
+        "--memory-limit=2G"
+      ],
+      "extensions": [".php"]
+    }
+  },
+  "mcp": {
+    "laravel-boost": {
+      "type": "local",
+      "enabled": true,
+      "command": ["php", "artisan", "boost:mcp"]
+    },
+    "herd": {
+      "type": "local",
+      "enabled": true,
+      "command": [
+        "php",
+        "/Applications/Herd.app/Contents/Resources/herd-mcp.phar"
+      ],
+      "environment": {
+        "SITE_PATH": "/Users/tyrailleverett/Documents/laravel-template"
+      }
+    },
+    "apify": {
+      "url": "https://mcp.apify.com/?tools=actors,docs,apify/rag-web-browser",
+      "enabled": true,
+      "type": "remote"
+    }
+  },
+  "tools": {
+    "apify*": false,
+    "herd*": false,
+    "laravel-boost*": false
+  },
+  "agent": {
+    "laravel-boost": {
+      "description": "Laravel development assistant with database access, logs, and Laravel ecosystem knowledge",
+      "mode": "subagent",
+      "tools": {
+        "laravel-boost*": true,
+        "read": true,
+        "edit": true,
+        "bash": true,
+        "write": true
+      },
+      "prompt": "You are a Laravel development specialist. Use Laravel Boost MCP tools to access application info, browser logs, database connections and queries, configuration, artisan commands, routes, and search Laravel documentation. Help users debug issues, query databases, inspect application state, and find relevant Laravel ecosystem documentation."
+    },
+    "herd": {
+      "description": "Manages Laravel Herd local development environment (sites, services, PHP versions)",
+      "mode": "subagent",
+      "tools": {
+        "herd*": true,
+        "read": true,
+        "edit": true,
+        "bash": true,
+        "write": true
+      },
+      "prompt": "You are a Laravel Herd specialist. Use Herd MCP tools to manage local development environment including: debugging sites (queries, jobs, logs, dumps), managing services (MySQL, Redis, PostgreSQL, etc.), managing PHP versions, managing sites (list, secure, isolate), and getting deployment information. Help users configure their Herd environment and troubleshoot local Laravel applications."
+    },
+    "apify": {
+      "description": "Runs Apify Actors for web scraping, data extraction, and automation tasks",
+      "mode": "subagent",
+      "tools": {
+        "apify*": true,
+        "read": true,
+        "edit": true,
+        "bash": false,
+        "write": true
+      },
+      "prompt": "You are an Apify automation specialist. Use Apify MCP tools to search and run Actors for web scraping, data extraction, and automation. Help users discover appropriate Actors for their tasks, execute web scraping operations, access Actor runs and results, and manage Apify storage. Write scraped data to files when needed."
+    }
+  }
+}
