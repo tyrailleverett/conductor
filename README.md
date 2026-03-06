@@ -7,7 +7,9 @@
 
 Conductor is a Laravel-native background job orchestration platform. It gives Laravel developers a self-hosted, code-first alternative to cloud services like trigger.dev and Inngest — bringing durable workflows, event-driven functions, and realtime visibility into background execution directly into their existing Laravel application.
 
-It ships with a pre-compiled dashboard (React + shadcn/ui) accessible at `/conductor`, modelled on Laravel Horizon. No additional frontend tooling, Inertia, or Node.js setup is required in the host application.
+It ships with a pre-compiled dashboard (React + shadcn/ui) accessible at `/conductor`, modelled on Laravel Horizon. The package serves a Blade shell that boots a standalone React SPA talking to Conductor's own JSON and SSE endpoints. No host-side frontend tooling, Inertia integration, or Node.js setup is required in the host application.
+
+Conductor intentionally does not use Inertia. As a Composer package, the dashboard needs to stay portable and independent of the host application's frontend lifecycle, routing conventions, and middleware stack. A Blade shell plus compiled SPA keeps the package self-contained while avoiding coupling to whatever rendering approach the host app already uses.
 
 ## Features
 

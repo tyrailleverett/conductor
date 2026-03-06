@@ -10,6 +10,8 @@ Phase 1 established the API route group at `/conductor/api/*` with `Authorize` m
 
 Phase 7 implements all 14 JSON API endpoints consumed by the dashboard SPA, plus the SSE streaming endpoint. Each endpoint delegates to the appropriate service or queries models directly for read operations. Controllers are thin — they accept input, delegate to services, and return JSON resources. Eloquent API Resources transform models into consistent JSON structures. The SSE endpoint uses a streaming response with a 500ms polling interval. All endpoints are registered in `routes/api.php`.
 
+These endpoints are package-owned transport surfaces for the standalone SPA. They are intentionally ordinary JSON and SSE routes rather than Inertia responses so the package remains decoupled from the host application's frontend stack.
+
 ---
 
 ## - [ ] 1. Eloquent API Resources

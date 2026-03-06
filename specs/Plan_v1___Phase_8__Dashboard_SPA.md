@@ -4,11 +4,13 @@ I have created the following plan after thorough exploration and analysis of the
 
 ## Observations
 
-Phase 1 established the Blade shell view (`resources/views/index.blade.php`) with a `<div id="app">` mount point. Phase 6 implemented `conductor:publish` which copies `resources/dist/` to `public/vendor/conductor/`. Phase 7 built all API endpoints under `/conductor/api/*` returning JSON. The current `package.json` has only commitlint and lefthook as dev dependencies — no frontend framework. The PRD specifies a React + shadcn/ui SPA with Vite, compiled output committed to `resources/dist/`, content-hash filenames, and a `manifest.json` read by the Blade shell. The SPA communicates via fetch-based JSON API (no Inertia).
+Phase 1 established the Blade shell view (`resources/views/index.blade.php`) with a `<div id="app">` mount point. Phase 6 implemented `conductor:publish` which copies `resources/dist/` to `public/vendor/conductor/`. Phase 7 built all API endpoints under `/conductor/api/*` returning JSON. The current `package.json` has only commitlint and lefthook as dev dependencies — no frontend framework. The PRD specifies a React + shadcn/ui SPA with Vite, compiled output committed to `resources/dist/`, content-hash filenames, and a `manifest.json` read by the Blade shell. The SPA communicates via fetch-based JSON API rather than Inertia because the dashboard must remain portable across host applications.
 
 ## Approach
 
 Phase 8 builds the self-contained React SPA dashboard. The frontend tooling (Vite, React, TypeScript, Tailwind CSS, shadcn/ui) is configured within the package itself — isolated from the host application. The compiled output goes to `resources/dist/` and is committed to git (same as Horizon/Telescope). The Blade shell reads `resources/dist/.vite/manifest.json` to resolve content-hashed asset URLs. The SPA uses React Router for client-side navigation across 9 pages. API communication uses a fetch wrapper that reads the `XSRF-TOKEN` cookie. SSE log streaming uses the EventSource API with a polling fallback. All frontend code lives in `resources/js/`.
+
+Do not introduce Inertia here. This phase intentionally builds a standalone SPA mounted inside a package-owned Blade shell so that Conductor can coexist with host applications using Blade, Livewire, Inertia, or no frontend framework at all.
 
 ## Visual References
 

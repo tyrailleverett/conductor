@@ -12,7 +12,7 @@ Conductor is a Laravel-native background job orchestration platform distributed 
 
 Existing solutions require developers to route their workloads to external SaaS platforms, introducing network latency, data egress concerns, vendor lock-in, and additional monthly costs. Laravel's built-in queue system is powerful but lacks first-class support for multi-step durable workflows, event chaining, and a unified observability dashboard. Conductor closes this gap by building on top of Laravel's existing infrastructure without replacing it.
 
-Conductor ships with a pre-compiled, self-contained dashboard built on React and shadcn/ui, accessible via a gated route in the host application (modelled on Laravel Horizon). No additional frontend tooling, Inertia installation, or Node.js setup is required in the host application.
+Conductor ships with a pre-compiled, self-contained dashboard built on React and shadcn/ui, accessible via a gated route in the host application (modelled on Laravel Horizon). The package serves a Blade shell that boots a standalone React SPA against Conductor-owned JSON and SSE endpoints. No host-side frontend tooling, Inertia installation, or Node.js setup is required in the host application.
 
 ### Product Principles
 
@@ -93,7 +93,9 @@ Conductor is a self-contained Laravel package. It registers its own routes, data
 
 **Frontend asset delivery**: The package ships pre-compiled JS and CSS in `resources/dist/`. The service provider publishes these to `public/vendor/conductor/`. A single Blade view (`conductor.blade.php`) serves as the HTML shell that bootstraps the React SPA. All SPA navigation is client-side via React Router.
 
-> **Note on Inertia**: The dashboard is built using React + shadcn/ui with a standard fetch-based API communication layer (not Inertia's protocol). This avoids any conflict with the host application's Inertia configuration while delivering the same developer experience. The development environment uses Vite + React; the compiled output is framework-agnostic static assets.
+> **Why not Inertia**: Conductor is a package dashboard, not an application shell. Using Inertia would couple the package to the host application's page lifecycle, middleware expectations, and frontend conventions. Conductor instead serves a plain Blade shell plus compiled static assets, and the SPA talks to package-owned JSON and SSE endpoints over standard same-origin HTTP.
+
+> **Frontend implementation**: The development environment uses Vite + React, but the distributed package ships compiled static assets. The host application does not need Inertia, a frontend build step, or any changes to its existing rendering stack.
 
 **SPA deep-link routing**: A wildcard route `GET /conductor/{any?}` (excluding `/conductor/api/*` and `/conductor/webhook/*`) returns the Blade shell on all matched paths. This ensures navigating directly to a URL such as `/conductor/jobs/abc-123` returns the SPA shell rather than a 404, allowing React Router to handle client-side routing.
 

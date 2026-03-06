@@ -10,6 +10,8 @@ This is a fresh Spatie Laravel Package Tools skeleton (`spatie/laravel-package-t
 
 Phase 1 transforms the skeleton into the Conductor package and establishes all foundational infrastructure: configuration schema, service provider, facade with auth gate, authorization middleware, route group registration, and the Blade shell view. The auth gate follows the Horizon pattern — a static closure stored on the main Conductor class, checked by middleware on every dashboard and API request. Routes are registered in three groups (SPA wildcard, API prefix, webhook prefix), but only the SPA shell route is functional in this phase; API and webhook route files are empty placeholders populated in later phases. This phase produces a bootable package that serves an empty dashboard shell behind an auth gate.
 
+The frontend architecture is intentionally not Inertia-based. Conductor is distributed as a reusable package, so the dashboard shell must remain independent of the host application's frontend lifecycle and page protocol. The Blade shell created here is the fixed HTML entry point for a standalone SPA that will later consume Conductor's own JSON endpoints.
+
 ---
 
 ## - [ ] 1. Package Renaming
@@ -188,7 +190,7 @@ Empty file with a comment noting it is populated in Phase 5. The route group pre
 
 **`resources/views/index.blade.php`**
 
-A minimal HTML5 document that serves as the entry point for the React SPA. Structure:
+A minimal HTML5 document that serves as the entry point for the React SPA. This is a plain Blade shell, not an Inertia response. Structure:
 
 1. `<!DOCTYPE html>` and `<html lang="en">`
 2. `<head>`:
