@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @see \HotReloadStudios\Conductor\Conductor
+ *
+ * @method static void auth(\Closure $callback)
  */
 final class Conductor extends Facade
 {
