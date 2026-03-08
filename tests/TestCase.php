@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace HotReloadStudios\Conductor\Tests;
 
+use Closure;
+use HotReloadStudios\Conductor\Conductor;
+use HotReloadStudios\Conductor\ConductorServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use HotReloadStudios\Conductor\ConductorServiceProvider;
+use ReflectionProperty;
 
-final class TestCase extends Orchestra
+abstract class TestCase extends Orchestra
 {
     protected function setUp(): void
     {
@@ -19,9 +22,10 @@ final class TestCase extends Orchestra
         );
     }
 
-    public function getEnvironmentSetUp($app)
+    final public function getEnvironmentSetUp($app): void
     {
         config()->set('database.default', 'testing');
+        config()->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
 
         /*
          foreach (\Illuminate\Support\Facades\File::allFiles(__DIR__ . '/../database/migrations') as $migration) {
@@ -30,10 +34,22 @@ final class TestCase extends Orchestra
          */
     }
 
-    protected function getPackageProviders($app)
+    protected function getPackageProviders($app): array
     {
         return [
             ConductorServiceProvider::class,
         ];
+    }
+
+    protected function setConductorAuth(?Closure $callback = null): void
+    {
+        if ($callback instanceof Closure) {
+            Conductor::auth($callback);
+
+            return;
+        }
+
+        $property = new ReflectionProperty(Conductor::class, 'authUsing');
+        $property->setValue(null, null);
     }
 }
