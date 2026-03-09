@@ -1,5 +1,5 @@
 ---
-description: Execute a phased implementation plan from specs/. Implements the entire phase using gitflow workflow with isolated worktree, one commit per section, and auto-creates a PR to develop.
+description: Execute a phased implementation plan from specs/. Implements the entire phase using gitflow workflow, one commit per section, and auto-creates a PR to develop.
 subtask: true
 ---
 
@@ -22,7 +22,7 @@ Follow these steps exactly in order. Do not skip steps.
 4. Parse all numbered sections by scanning for `## - [ ]` headings — each heading through the next `---` or next heading is one section
 5. Abort with a clear error if the file doesn't exist or contains no parseable sections
 6. **Cross-phase dependency check** — If the phase number is greater than 1, search for a merged PR for the prior phase: `gh pr list --state merged --search "Phase {N-1}:" --json number,title --limit 1`. If no merged PR is found, warn the user: "No merged PR found for Phase {N-1}. Phase {N} may depend on work from Phase {N-1}." Ask the user for confirmation before proceeding. If the user declines, abort.
-7. **Resume detection** — Derive the branch name from the plan filename (see @.claude/skills/execute-phase/references/git-workflow.md). Check if the branch already exists (`git branch --list <branch-name>`). If it exists and a worktree exists at `.claude/worktrees/<branch-name>`, this is a resume — skip to Step 3a.
+7. **Resume detection** — Derive the branch name from the plan filename (see @.claude/skills/execute-phase/references/git-workflow.md). Check if the branch already exists (`git branch --list <branch-name>`). If it exists, this is a resume — skip to Step 3a.
 
 ### Step 2: Git Setup
 
@@ -33,19 +33,19 @@ Follow the **Git Initialization** procedure in @.claude/skills/execute-phase/ref
 3. If working tree is dirty (uncommitted changes) → abort and tell the user to commit or stash
 4. Checkout `develop` and pull if a remote exists
 
-### Step 3: Create Worktree & Branch
+### Step 3: Create Branch
 
-Follow the **Worktree & Branch** procedure in @.claude/skills/execute-phase/references/git-workflow.md:
+Follow the **Branch Setup** procedure in @.claude/skills/execute-phase/references/git-workflow.md:
 
 1. Derive the branch name from the plan filename (e.g., `feature/phase-1-environments-and-api-keys`)
-2. Use the `EnterWorktree` tool with the branch name as the worktree name
-3. Confirm the worktree is on the correct branch
+2. Run `git checkout -b <branch-name>` from the `develop` branch
+3. Confirm you are on the correct branch: `git branch --show-current`
 
-#### Step 3a: Resume Into Existing Worktree
+#### Step 3a: Resume Into Existing Branch
 
 If resume was detected in Step 1.6:
 
-1. Enter the existing worktree at `.claude/worktrees/<branch-name>`
+1. Checkout the existing branch: `git checkout <branch-name>`
 2. Read the git log to find the last committed section: parse commit messages for `Phase {N}.{S}:` pattern, take the highest `{S}`
 3. Report to the user: "Resuming Phase {N} from section {S+1}. Sections 1-{S} already committed."
 4. Proceed to Step 4, starting from section S+1
@@ -105,12 +105,11 @@ Follow the **PR Creation** procedure in @.claude/skills/execute-phase/references
 
 ### Resuming a failed phase
 
-If execution stopped due to repeated test failures, re-invoke execute-phase with the same plan file. It will detect the existing branch and worktree, find the last committed section, and resume from the next one. Fix the failing code manually before re-invoking.
+If execution stopped due to repeated test failures, re-invoke execute-phase with the same plan file. It will detect the existing branch, find the last committed section, and resume from the next one. Fix the failing code manually before re-invoking.
 
 ### Starting fresh
 
 To abandon a partial execution and start over:
 
-1. Remove the worktree: `git worktree remove .claude/worktrees/<branch-name>`
-2. Delete the branch: `git branch -D <branch-name>`
-3. Re-invoke execute-phase with the same plan file
+1. Delete the branch: `git branch -D <branch-name>`
+2. Re-invoke execute-phase with the same plan file
