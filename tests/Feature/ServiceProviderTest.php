@@ -20,3 +20,42 @@ it('merges published config with defaults', function (): void {
         ->and(config('conductor.queue.queue'))->toBe('conductor')
         ->and(config('conductor.functions'))->toBe([]);
 });
+
+it('casts webhook rate limit env values to integers', function (): void {
+    $originalWebhookRateLimit = getenv('CONDUCTOR_WEBHOOK_RATE_LIMIT');
+
+    putenv('CONDUCTOR_WEBHOOK_RATE_LIMIT=120');
+
+    $config = require __DIR__.'/../../config/conductor.php';
+
+    expect($config['webhook_rate_limit'])->toBeInt()->toBe(120);
+
+    putenv($originalWebhookRateLimit === false
+        ? 'CONDUCTOR_WEBHOOK_RATE_LIMIT'
+        : 'CONDUCTOR_WEBHOOK_RATE_LIMIT='.$originalWebhookRateLimit);
+});
+
+it('does not leave skeleton placeholders in composer metadata', function (): void {
+    try {
+        /** @var array<string, mixed> $composer */
+        $composer = json_decode(
+            file_get_contents(__DIR__.'/../../composer.json') ?: '',
+            true,
+            flags: JSON_THROW_ON_ERROR,
+        );
+    } catch (JsonException $exception) {
+        test()->fail($exception->getMessage());
+    }
+
+    $composerMetadata = json_encode([
+        'keywords' => $composer['keywords'] ?? [],
+        'homepage' => $composer['homepage'] ?? null,
+        'authors' => $composer['authors'] ?? [],
+    ], JSON_THROW_ON_ERROR);
+
+    expect($composerMetadata)
+        ->not->toContain(':vendor_name')
+        ->not->toContain(':vendor_slug')
+        ->not->toContain(':package_slug')
+        ->not->toContain(':author_name');
+});

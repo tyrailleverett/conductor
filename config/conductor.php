@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+$webhookRateLimit = env('CONDUCTOR_WEBHOOK_RATE_LIMIT', 60);
+
 return [
     'path' => env('CONDUCTOR_PATH', 'conductor'),
 
@@ -41,5 +43,5 @@ return [
     */
     'webhooks' => [],
 
-    'webhook_rate_limit' => env('CONDUCTOR_WEBHOOK_RATE_LIMIT', 60),
+    'webhook_rate_limit' => $webhookRateLimit === null ? null : (int) $webhookRateLimit,
 ];

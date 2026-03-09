@@ -2,16 +2,16 @@
     "name": "hotreloadstudios/conductor",
     "description": "Laravel-native background job orchestration with durable workflows, event-driven functions, and realtime visibility.",
     "keywords": [
-        ":vendor_name",
+        "conductor",
         "laravel",
-        ":package_slug"
+        "workflows"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/tyrailleverett/conductor",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Tyrail Leverett",
+            "email": "tyrailleverett@gmail.com",
             "role": "Developer"
         }
     ],
