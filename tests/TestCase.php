@@ -26,12 +26,13 @@ abstract class TestCase extends Orchestra
     {
         config()->set('database.default', 'testing');
         config()->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
+    }
 
-        /*
-         foreach (\Illuminate\Support\Facades\File::allFiles(__DIR__ . '/../database/migrations') as $migration) {
-            (include $migration->getRealPath())->up();
-         }
-         */
+    protected function defineDatabaseMigrations(): void
+    {
+        foreach (glob(__DIR__.'/../database/migrations/*.php.stub') as $migration) {
+            (include $migration)->up();
+        }
     }
 
     protected function getPackageProviders($app): array
