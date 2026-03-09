@@ -19,6 +19,19 @@ final class ConductorServiceProvider extends PackageServiceProvider
             ->name('conductor')
             ->hasConfigFile()
             ->hasViews()
+            ->hasMigrations([
+                'create_conductor_jobs_table',
+                'create_conductor_job_logs_table',
+                'create_conductor_workflows_table',
+                'create_conductor_workflow_steps_table',
+                'create_conductor_events_table',
+                'create_conductor_event_runs_table',
+                'create_conductor_schedules_table',
+                'create_conductor_workers_table',
+                'create_conductor_webhook_sources_table',
+                'create_conductor_webhook_logs_table',
+                'create_conductor_metric_snapshots_table',
+            ])
             ->hasRoute('web');
     }
 
