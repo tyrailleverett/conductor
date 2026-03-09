@@ -15,15 +15,17 @@ Follow these steps exactly in order. Do not skip steps.
 
 ### Step 1: Validate Inputs
 
-1. Parse `$ARGUMENTS` — expect two space-separated values: the plan file path and the PR URL or number
-2. Read the plan file, extract the phase number and title from the filename (e.g., `Plan_v1___Phase_2__API_Keys.md` → Phase 2, "API Keys")
-3. Parse all sections by scanning for `## - [ ]` headings — each heading through the next `---` or next heading is one section
-4. Use `gh pr view <PR> --json number,headRefName,headRefOid,url` to confirm the PR exists and is open
-5. Abort with a clear error if:
-   - `$ARGUMENTS` is missing or does not contain two values
-   - The plan file does not exist
-   - The plan file contains no parseable `## - [ ]` sections
+1. Parse `$ARGUMENTS` — expect a single value: the PR URL or number
+2. Run `gh pr view <PR> --json number,headRefName,headRefOid,url,body` to confirm the PR exists and is open
+3. Extract the plan file path from the PR body by finding the line matching `Plan: <path>` (written there by execute-phase)
+4. Read the plan file at that path, extract the phase number and title from the filename (e.g., `Plan_v1___Phase_2__API_Keys.md` → Phase 2, "API Keys")
+5. Parse all sections by scanning for `## - [ ]` headings — each heading through the next `---` or next heading is one section
+6. Abort with a clear error if:
+   - `$ARGUMENTS` is missing
    - The PR does not exist or is closed/merged
+   - The PR body contains no `Plan:` line
+   - The plan file does not exist at the extracted path
+   - The plan file contains no parseable `## - [ ]` sections
 
 ### Step 2: Checkout the PR Branch
 

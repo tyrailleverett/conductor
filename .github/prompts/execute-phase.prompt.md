@@ -98,6 +98,12 @@ Follow the **PR Creation** procedure in @.claude/skills/execute-phase/references
 
 1. Push the feature branch to remote
 2. Create a PR to `develop` using `gh pr create` with the structured summary format
+   - The PR body **must** include a metadata line in the following exact format:
+     ```
+     Plan: <relative-path-to-plan-file>
+     ```
+     Example: `Plan: specs/Plan_v1___Phase_1__Environments_and_API_Keys.md`
+   - Place this line at the very end of the PR body, after all other content
 3. Report the PR URL to the user
 
 ## Resuming and Rollback
