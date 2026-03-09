@@ -49,11 +49,18 @@ If resume was detected in Step 1.6:
 3. Report to the user: "Resuming Phase {N} from section {S+1}. Sections 1-{S} already committed."
 4. Proceed to Step 4, starting from section S+1
 
-### Step 4: Execute Sections
+### Step 4: Build Todo List
+
+Before executing any sections, create a todo list using the `manage_todo_list` tool containing one item per section parsed in Step 1.4. Use the section title as the todo label and set all items to `not-started`. This list must be created once and maintained throughout execution.
+
+### Step 5: Execute Sections
 
 For each numbered section in the plan, in order:
 
-#### 4a. Implement
+1. Implement, verify, and commit the section (steps 5a–5d below).
+2. Mark the section's todo item as `completed` immediately after its commit succeeds.
+
+#### 5a. Implement
 
 1. Read the section's instructions from the plan
 2. Follow @.claude/skills/execute-phase/references/section-execution.md to determine the implementation approach based on section type
@@ -61,38 +68,38 @@ For each numbered section in the plan, in order:
 4. Use `php artisan make:*` commands where the plan specifies
 5. When implementing test sections, invoke the **pest-testing** skill
 
-#### 4b. Verify
+#### 5b. Verify
 
 1. Run `php artisan test --compact` (filter to relevant test files if they exist for this section)
 2. Run `bun run lint`
 3. Run `composer lint`
 4. If linters made formatting changes, include them in this section's commit
 
-#### 4c. On Failure → Fix & Retry
+#### 5c. On Failure → Fix & Retry
 
 If tests fail, enter the fix-and-retry loop (max 3 attempts):
 
 1. Invoke the **systematic-debugging** skill with the failure output
 2. Apply the fix
-3. Re-run verification (4b)
+3. Re-run verification (5b)
 4. If still failing after 3 attempts → commit what works, report the failure to the user, and **stop execution entirely** (do not proceed to the next section)
 
-#### 4d. Commit
+#### 5d. Commit
 
 1. Stage relevant files by specific path — never use `git add .` or `git add -A`
 2. Commit with message format: `Phase {N}.{S}: {Section Title}`
    - Example: `Phase 1.4: Models`
 
-### Step 5: Final Verification
+### Step 6: Final Verification
 
 After all sections are implemented and committed:
 
 1. Run the full test suite: `php artisan test --compact`
 2. Run full formatting: `vendor/bin/pint --dirty --format agent`
-3. If any failures, enter the fix-and-retry loop from Step 4c
+3. If any failures, enter the fix-and-retry loop from Step 5c
 4. Commit any final fixes
 
-### Step 6: Create PR
+### Step 7: Create PR
 
 Follow the **PR Creation** procedure in @.claude/skills/execute-phase/references/git-workflow.md:
 
