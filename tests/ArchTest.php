@@ -12,4 +12,5 @@ arch('conductor classes use strict types')
 
 arch('conductor classes are final')
     ->expect('HotReloadStudios\\Conductor')
+    ->classes()
     ->toBeFinal();
