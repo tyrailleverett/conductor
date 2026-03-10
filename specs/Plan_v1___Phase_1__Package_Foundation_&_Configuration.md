@@ -14,7 +14,7 @@ The frontend architecture is intentionally not Inertia-based. Conductor is distr
 
 ---
 
-## - [ ] 1. Package Renaming
+## - [x] 1. Package Renaming
 
 Rename the skeleton package identity. This can be done by running `php configure.php` or by manually updating:
 
@@ -24,7 +24,7 @@ Rename the skeleton package identity. This can be done by running `php configure
 
 ---
 
-## - [ ] 2. Configuration File
+## - [x] 2. Configuration File
 
 **`config/conductor.php`**
 
@@ -48,7 +48,7 @@ The config array must include a comment block above `webhooks` showing an exampl
 
 ---
 
-## - [ ] 3. Conductor Main Class
+## - [x] 3. Conductor Main Class
 
 **`src/Conductor.php`**
 
@@ -69,7 +69,7 @@ Both methods are `public static`. The class is `final`.
 
 ---
 
-## - [ ] 4. Facade
+## - [x] 4. Facade
 
 **`src/Facades/Conductor.php`**
 
@@ -80,7 +80,7 @@ Replace the existing `Skeleton` facade. The facade extends `Illuminate\Support\F
 
 ---
 
-## - [ ] 5. Service Provider
+## - [x] 5. Service Provider
 
 **`src/ConductorServiceProvider.php`**
 
@@ -123,7 +123,7 @@ sequenceDiagram
 
 ---
 
-## - [ ] 6. Authorization Middleware
+## - [x] 6. Authorization Middleware
 
 **`src/Http/Middleware/Authorize.php`**
 
@@ -158,7 +158,7 @@ sequenceDiagram
 
 ---
 
-## - [ ] 7. Route Files
+## - [x] 7. Route Files
 
 Create three route files in the `routes/` directory.
 
@@ -186,7 +186,7 @@ Empty file with a comment noting it is populated in Phase 5. The route group pre
 
 ---
 
-## - [ ] 8. Blade Shell View
+## - [x] 8. Blade Shell View
 
 **`resources/views/index.blade.php`**
 
@@ -208,7 +208,7 @@ The `csrf-token` meta tag enables the SPA to read the CSRF token for `X-XSRF-TOK
 
 ---
 
-## - [ ] 9. Tests
+## - [x] 9. Tests
 
 ### Feature Tests
 
@@ -242,7 +242,7 @@ The `csrf-token` meta tag enables the SPA to read the CSRF token for `X-XSRF-TOK
 
 ---
 
-## - [ ] 10. Directory Structure Summary
+## - [x] 10. Directory Structure Summary
 
 After Phase 1, the package structure is:
 

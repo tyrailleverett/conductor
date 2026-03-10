@@ -36,13 +36,13 @@ If output is non-empty → **abort** with this message:
 
 ### Cross-phase dependency check
 
-Before creating a feature branch for Phase N (where N > 1), verify the prior phase is merged:
+Before creating a feature branch for Phase N (where N > 1), verify the prior phase was completed on develop:
 
 ```
-gh pr list --state merged --search "Phase {N-1}:" --json number,title --limit 1
+git log develop --oneline | grep "Phase {N-1}\."
 ```
 
-If the result is empty, warn the user that Phase {N-1} has not been merged and ask for confirmation. This is a soft guard — the user can override if they're intentionally running phases out of order or if Phase 1 is the first phase being executed.
+If nothing is found, warn the user that Phase {N-1} has not been completed on develop and ask for confirmation before proceeding.
 
 ## Branch Naming
 
@@ -93,29 +93,58 @@ Where:
 - If `vendor/bin/pint` made formatting changes, include those in the same commit
 - Use `git status` to review what will be staged before committing
 
-## PR Creation
+## Finalization (used by verify-phase)
 
-After all sections are committed and the final verification passes:
+After verify-phase confirms all checks pass, commit and push to develop:
 
-### 1. Push the branch
+### 1. Stage all changed files
 
+Stage files by specific path — do not use `git add .` or `git add -A`.
+Use `git status --porcelain` to enumerate all modified/new files, then stage each by path:
+
+```bash
+git add <path1> <path2> ...
 ```
-git push -u origin <branch-name>
+
+### 2. Commit
+
+```bash
+git commit -m "Phase {N}: {Phase Title}"
 ```
 
-### 2. Create the PR
+Example: `Phase 1: Environments and API Keys`
 
-Use `gh pr create` targeting the `develop` branch.
+### 3. Checkout develop
 
-**Title:** `Phase {N}: {Phase Title}`
-- Example: `Phase 1: Environments and API Keys`
+```bash
+git checkout develop
+```
 
-**Body format:**
+### 4. Merge the feature branch
 
-```markdown
-## Summary
-- Implements Phase {N} from `specs/{plan_filename}`
-- {one bullet per section describing what was created/modified}
+```bash
+git merge <branch-name> --no-ff
+```
+
+### 5. Push to remote
+
+```bash
+git push origin develop
+```
+
+### 6. Delete the local feature branch
+
+```bash
+git branch -D <branch-name>
+```
+
+### 7. Delete the remote feature branch (if it was pushed)
+
+```bash
+git push origin --delete <branch-name>
+```
+
+Skip silently if the remote branch does not exist.
 
 ## Sections Implemented
 - [x] 1. {Section Title}
