@@ -105,7 +105,7 @@ final class WorkflowEngine
             ]);
         }
 
-        if ($step->isTerminal()) {
+        if ($step->status === StepStatus::Completed || $step->status === StepStatus::Skipped) {
             return $step->output;
         }
 
