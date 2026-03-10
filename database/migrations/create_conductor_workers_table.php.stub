@@ -1,0 +1,34 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('conductor_workers', function (Blueprint $table): void {
+            $table->id();
+            $table->uuid('worker_uuid');
+            $table->string('worker_name');
+            $table->string('queue');
+            $table->string('connection');
+            $table->string('hostname');
+            $table->unsignedInteger('process_id');
+            $table->string('current_job_uuid')->nullable();
+            $table->timestamp('last_heartbeat_at');
+            $table->timestamps();
+
+            $table->unique('worker_uuid');
+            $table->index('last_heartbeat_at');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('conductor_workers');
+    }
+};

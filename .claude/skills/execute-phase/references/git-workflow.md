@@ -60,11 +60,10 @@ Derive the feature branch name from the plan filename.
 
 **Output:** `feature/phase-1-environments-and-api-keys`
 
-## Worktree & Branch Setup
+## Branch Setup
 
-1. From the `develop` branch, use the `EnterWorktree` tool with the derived branch name
-2. The worktree is created at `.claude/worktrees/<branch-name>`
-3. Verify you are on the correct branch: `git branch --show-current`
+1. From the `develop` branch, run: `git checkout -b <branch-name>`
+2. Verify you are on the correct branch: `git branch --show-current`
 
 ## Commit Convention
 
