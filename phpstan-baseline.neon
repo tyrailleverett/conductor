@@ -1,0 +1,121 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 7
+			path: config/conductor.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between 60\|bool\|string and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: config/conductor.php
+
+		-
+			message: '#^Trait HotReloadStudios\\Conductor\\Concerns\\Trackable is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Concerns/Trackable.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorJob\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/ConductorServiceProvider.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorJob\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/ConductorServiceProvider.php
+
+		-
+			message: '#^PHPDoc tag @var with type mixed is not subtype of native type object\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: src/ConductorServiceProvider.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorJob\:\:\$cancellable_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/ConductorJob.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorJob\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Models/ConductorJob.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorWorker\:\:\$current_job_uuid\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/ConductorWorker.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorWorker\:\:\$last_heartbeat_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/ConductorWorker.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorWorkflow\:\:\$current_step_index\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/ConductorWorkflow.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorWorkflow\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/ConductorWorkflow.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorWorkflowStep\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/ConductorWorkflowStep.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorJob\:\:\$cancellable_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/JobCancellationService.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorJob\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/JobCancellationService.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorJob\:\:\$attempts\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/JobRetryService.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorJob\:\:\$payload\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/JobRetryService.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorJob\:\:\$queue\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/JobRetryService.php
+
+		-
+			message: '#^Access to an undefined property HotReloadStudios\\Conductor\\Models\\ConductorJob\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/JobRetryService.php
+
+		-
+			message: '#^Access to protected property HotReloadStudios\\Conductor\\Models\\ConductorJob\:\:\$connection\.$#'
+			identifier: property.protected
+			count: 1
+			path: src/Services/JobRetryService.php
