@@ -133,14 +133,12 @@ WHILE tests fail AND attempts < 3:
     5. attempts++
 
 IF attempts == 3 AND still failing:
-    1. Commit what works so far with message suffix: " (partial — tests failing)"
-    2. Report the failure details to the user
-    3. STOP — do not proceed to the next section
+    1. Report the failure details to the user
+    2. STOP — do not proceed to the next section
+    (All implemented files remain in the working directory as-is for the user to inspect)
 ```
 
-The user can re-invoke execute-phase with the same plan file to resume from this section after fixing the issue manually.
-
-**Why stop instead of skip:** Later sections depend on earlier ones. Skipping a broken migration means models won't work, controllers won't work, and tests won't pass. It's better to stop and get human help.
+The user can fix the issue manually and re-invoke execute-phase with the same plan file to re-implement all sections when ready.
 
 ## Verification After Each Section
 
