@@ -13,6 +13,8 @@ use HotReloadStudios\Conductor\Models\ConductorJob;
 use HotReloadStudios\Conductor\Services\JobCancellationService;
 use HotReloadStudios\Conductor\Services\JobRetryService;
 use HotReloadStudios\Conductor\Services\PayloadRedactor;
+use HotReloadStudios\Conductor\Services\WorkflowCancellationService;
+use HotReloadStudios\Conductor\Services\WorkflowEngine;
 use HotReloadStudios\Conductor\Support\ConductorContext;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
@@ -57,6 +59,8 @@ final class ConductorServiceProvider extends PackageServiceProvider
         $this->app->singleton(PayloadRedactor::class);
         $this->app->singleton(JobRetryService::class);
         $this->app->singleton(JobCancellationService::class);
+        $this->app->singleton(WorkflowEngine::class);
+        $this->app->singleton(WorkflowCancellationService::class);
     }
 
     public function packageBooted(): void

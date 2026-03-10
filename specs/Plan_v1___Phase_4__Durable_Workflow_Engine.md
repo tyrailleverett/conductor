@@ -12,7 +12,7 @@ Phase 4 builds the durable workflow engine — the system that executes multi-st
 
 ---
 
-## - [ ] 1. Workflow Base Class
+## - [x] 1. Workflow Base Class
 
 **`src/Workflow.php`**
 
@@ -38,7 +38,7 @@ The class is NOT `final` — it is `abstract` and intended for extension. It sho
 
 ---
 
-## - [ ] 2. WorkflowContext
+## - [x] 2. WorkflowContext
 
 **`src/WorkflowContext.php`**
 
@@ -75,7 +75,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 3. WorkflowEngine Service
+## - [x] 3. WorkflowEngine Service
 
 **`src/Services/WorkflowEngine.php`**
 
@@ -157,7 +157,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 4. WorkflowStepJob
+## - [x] 4. WorkflowStepJob
 
 **`src/Jobs/WorkflowStepJob.php`**
 
@@ -192,7 +192,7 @@ This job does NOT use the `Trackable` trait — its execution is tracked indirec
 
 ---
 
-## - [ ] 5. PendingWorkflowDispatch
+## - [x] 5. PendingWorkflowDispatch
 
 **`src/PendingWorkflowDispatch.php`**
 
@@ -220,7 +220,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 6. Workflow Cancellation
+## - [x] 6. Workflow Cancellation
 
 **`src/Services/WorkflowCancellationService.php`**
 
@@ -238,7 +238,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 7. Service Provider Bindings
+## - [x] 7. Service Provider Bindings
 
 **Update `src/ConductorServiceProvider.php`:**
 
@@ -248,7 +248,7 @@ In `packageRegistered()`, add singleton bindings:
 
 ---
 
-## - [ ] 8. Tests
+## - [x] 8. Tests
 
 ### Unit Tests
 
@@ -283,7 +283,7 @@ In `packageRegistered()`, add singleton bindings:
 
 ---
 
-## - [ ] 9. Test Workflow Fixture
+## - [x] 9. Test Workflow Fixture
 
 Create a test helper workflow class used by the feature tests:
 
