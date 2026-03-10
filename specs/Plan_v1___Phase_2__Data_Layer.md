@@ -12,7 +12,7 @@ Phase 2 creates the complete data layer for Conductor: 9 enums, 11 migration stu
 
 ---
 
-## - [ ] 1. Enums
+## - [x] 1. Enums
 
 Create all enums in `src/Enums/`. Every enum is `string`-backed with TitleCase keys.
 
@@ -108,7 +108,7 @@ This enum represents the derived status of a worker (computed at query time, nev
 
 ---
 
-## - [ ] 2. Migrations
+## - [x] 2. Migrations
 
 Create all migration stubs in `database/migrations/`. Delete the existing `create_skeleton_table.php.stub`. Each file uses the `.php.stub` extension (Spatie convention). Migrations are listed in the order they must run — parent tables before child tables so foreign keys resolve.
 
@@ -326,7 +326,7 @@ No `timestamps()`.
 
 ---
 
-## - [ ] 3. Models
+## - [x] 3. Models
 
 All models are in `src/Models/`, are `final`, use `declare(strict_types=1)`, and set `$table` explicitly to avoid namespace-derived table name issues.
 
@@ -547,7 +547,7 @@ All models are in `src/Models/`, are `final`, use `declare(strict_types=1)`, and
 
 ---
 
-## - [ ] 4. Factories
+## - [x] 4. Factories
 
 All factories in `database/factories/`. Delete the existing `ModelFactory.php` placeholder. Every factory is `final` and uses `fake()`.
 
@@ -761,13 +761,13 @@ All factories in `database/factories/`. Delete the existing `ModelFactory.php` p
 
 ---
 
-## - [ ] 5. Service Provider Migration Registration
+## - [x] 5. Service Provider Migration Registration
 
 Update `ConductorServiceProvider::configurePackage()` (from Phase 1) to register all 11 migrations via `->hasMigrations([...])`. The array items are the migration stub filenames without the `.php.stub` extension, in the order listed in section 2.
 
 ---
 
-## - [ ] 6. Tests
+## - [x] 6. Tests
 
 ### Unit Tests
 
@@ -836,7 +836,7 @@ Update `ConductorServiceProvider::configurePackage()` (from Phase 1) to register
 
 ---
 
-## - [ ] 7. Data Model Diagram
+## - [x] 7. Data Model Diagram
 
 ```mermaid
 classDiagram

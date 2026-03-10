@@ -12,7 +12,7 @@ Phase 3 implements the core job tracking mechanism — the system that transform
 
 ---
 
-## - [ ] 1. PayloadRedactor Service
+## - [x] 1. PayloadRedactor Service
 
 **`src/Services/PayloadRedactor.php`**
 
@@ -39,7 +39,7 @@ sequenceDiagram
 
 ---
 
-## - [ ] 2. ConductorContext Static Holder
+## - [x] 2. ConductorContext Static Holder
 
 **`src/Support/ConductorContext.php`**
 
@@ -62,7 +62,7 @@ All methods are `public static`. The class is `final`.
 
 ---
 
-## - [ ] 3. ConductorLogHandler (Monolog Handler)
+## - [x] 3. ConductorLogHandler (Monolog Handler)
 
 **`src/Logging/ConductorLogHandler.php`**
 
@@ -83,7 +83,7 @@ The handler uses `PayloadRedactor` to redact the log message if it contains any 
 
 ---
 
-## - [ ] 4. Trackable Trait
+## - [x] 4. Trackable Trait
 
 **`src/Concerns/Trackable.php`**
 
@@ -110,7 +110,7 @@ The trait does NOT directly register listeners. Instead, the service provider re
 
 ---
 
-## - [ ] 5. Queue Event Listeners (Service Provider Integration)
+## - [x] 5. Queue Event Listeners (Service Provider Integration)
 
 **Update `src/ConductorServiceProvider.php`** — In `packageBooted()`, register three queue event listeners using `Queue::before()`, `Queue::after()`, and `Queue::failing()`.
 
@@ -197,7 +197,7 @@ sequenceDiagram
 
 ---
 
-## - [ ] 6. Job Retry Service
+## - [x] 6. Job Retry Service
 
 **`src/Services/JobRetryService.php`**
 
@@ -220,7 +220,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 7. Job Cancellation Service
+## - [x] 7. Job Cancellation Service
 
 **`src/Services/JobCancellationService.php`**
 
@@ -240,7 +240,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 8. JobCancelledException
+## - [x] 8. JobCancelledException
 
 **`src/Exceptions/JobCancelledException.php`**
 
@@ -248,7 +248,7 @@ A simple exception class extending `RuntimeException`. Used by jobs that detect 
 
 ---
 
-## - [ ] 9. Service Provider Bindings
+## - [x] 9. Service Provider Bindings
 
 **Update `src/ConductorServiceProvider.php`** — In `packageRegistered()`, add singleton bindings:
 
@@ -260,7 +260,7 @@ In `packageBooted()`, register the queue event listeners described in section 5.
 
 ---
 
-## - [ ] 10. Tests
+## - [x] 10. Tests
 
 ### Unit Tests
 
