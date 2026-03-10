@@ -12,7 +12,7 @@ return new class extends Migration
     {
         Schema::create('conductor_webhook_logs', function (Blueprint $table): void {
             $table->id();
-            $table->string('source');
+            $table->string('source')->index();
             $table->json('payload')->nullable();
             $table->string('masked_signature')->nullable();
             $table->string('status');
