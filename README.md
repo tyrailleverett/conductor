@@ -7,9 +7,7 @@
 
 Conductor is a Laravel-native background job orchestration platform. It gives Laravel developers a self-hosted, code-first alternative to cloud services like trigger.dev and Inngest — bringing durable workflows, event-driven functions, and realtime visibility into background execution directly into their existing Laravel application.
 
-It ships with a pre-compiled dashboard (React + shadcn/ui) accessible at `/conductor`, modelled on Laravel Horizon. The package serves a Blade shell that boots a standalone React SPA talking to Conductor's own JSON and SSE endpoints. No host-side frontend tooling, Inertia integration, or Node.js setup is required in the host application.
-
-Conductor intentionally does not use Inertia. As a Composer package, the dashboard needs to stay portable and independent of the host application's frontend lifecycle, routing conventions, and middleware stack. A Blade shell plus compiled SPA keeps the package self-contained while avoiding coupling to whatever rendering approach the host app already uses.
+It ships with a pre-compiled dashboard (React + shadcn/ui) accessible at `/conductor`, modelled on Laravel Horizon. No host-side frontend tooling, Inertia integration, or Node.js setup is required.
 
 ## Features
 
@@ -27,97 +25,55 @@ Conductor intentionally does not use Inertia. As a Composer package, the dashboa
 - Laravel 11 or 12
 - MySQL or PostgreSQL (required for durable workflow locking; SQLite is supported for development only)
 
-## Installation
+## Getting Started
 
-Install via Composer:
+### 1. Install
 
 ```bash
 composer require hotreloadstudios/conductor
 ```
 
-Publish and run the migrations:
+### 2. Publish & Run Migrations
 
 ```bash
 php artisan vendor:publish --tag="conductor-migrations"
 php artisan migrate
 ```
 
-Publish the dashboard assets:
+### 3. Publish Dashboard Assets
 
 ```bash
 php artisan conductor:publish
 ```
 
-Publish the config file:
+### 4. Configure Dashboard Access
 
-```bash
-php artisan vendor:publish --tag="conductor-config"
-```
-
-## Configuration
-
-The published `config/conductor.php` file:
-
-```php
-return [
-    // URL prefix for the dashboard and API routes
-    'path' => 'conductor',
-
-    // Middleware applied to all Conductor routes
-    'middleware' => ['web'],
-
-    // Queue connection and queue name for Conductor's internal jobs
-    'queue' => [
-        'connection' => env('CONDUCTOR_QUEUE_CONNECTION', null),
-        'queue'      => env('CONDUCTOR_QUEUE', 'conductor'),
-    ],
-
-    // Number of days to retain historical records before pruning
-    'prune_after_days' => 7,
-
-    // Worker heartbeat interval in seconds
-    'heartbeat_interval' => 15,
-
-    // Seconds without a heartbeat before a worker is considered offline
-    'worker_timeout' => 60,
-
-    // Keys whose values are masked before persisting payloads and logs
-    'redact_keys' => [
-        'password', 'token', 'authorization', 'secret',
-        'api_key', 'cookie', 'x-signature', 'x-hub-signature',
-    ],
-
-    // Registered event functions and scheduled functions
-    'functions' => [],
-
-    // Registered webhook sources
-    'webhooks' => [],
-
-    // Rate limit for webhook ingestion — requests per minute per IP (null to disable)
-    'webhook_rate_limit' => 60,
-];
-```
-
-## Dashboard Access
-
-Dashboard access is gated by a closure registered in your service provider, identical to how Horizon works:
+In `AppServiceProvider::boot()`, configure who can access the dashboard. In `local`, all users are allowed by default. In all other environments, the gate must be explicitly set:
 
 ```php
 use Conductor\Facades\Conductor;
+use Illuminate\Http\Request;
 
-// In AppServiceProvider::boot()
 Conductor::auth(function (Request $request): bool {
     return $request->user()?->hasRole('admin') ?? false;
 });
 ```
 
-In the `local` environment all users are allowed by default. In all other environments the gate must be explicitly configured, or a `403` is returned.
+### 5. Start a Queue Worker
 
-## Usage
+```bash
+php artisan queue:work --queue=conductor,default
+```
 
-### Tracked Jobs
+The dashboard is now accessible at `/conductor`.
 
-Add the `Trackable` trait to any job to enable status tracking, log capture, and cooperative cancellation:
+---
+
+## Quick Examples
+
+### Track a Job
+
+Add `Trackable` to any `ShouldQueue` job. Conductor records status, duration, logs, and enables retry/cancel from the dashboard:
 
 ```php
 use Conductor\Concerns\Trackable;
@@ -130,16 +86,20 @@ final class SendInvoiceJob implements ShouldQueue
 
     public function handle(): void
     {
-        // job logic
+        logger()->info('Sending invoice', ['id' => $this->invoiceId]);
+        // ...
     }
 }
 ```
 
-### Durable Workflows
+### Define a Durable Workflow
 
-Extend `Conductor\Workflow` and define steps via `$ctx->step()`. Each step's result is persisted so the workflow can resume from the last completed step on failure:
+Each step's result is persisted. On failure, the workflow resumes from the last completed step rather than restarting:
 
 ```php
+use Conductor\Workflow;
+use Conductor\WorkflowContext;
+
 final class WelcomeWorkflow extends Workflow
 {
     public function __construct(private readonly User $user) {}
@@ -157,68 +117,65 @@ final class WelcomeWorkflow extends Workflow
         });
     }
 }
-```
 
-Dispatch a workflow like a standard job:
-
-```php
+// Dispatch like a standard job
 WelcomeWorkflow::dispatch($user);
 ```
 
-### Event Functions
-
-Register event functions in `config/conductor.php`, then dispatch named events from anywhere:
+### Dispatch an Event
 
 ```php
-// config/conductor.php
+use HotReloadStudios\Conductor\Models\ConductorEvent;
+
+ConductorEvent::dispatch('user.created', ['user_id' => $user->id]);
+```
+
+Register listener functions in `config/conductor.php`:
+
+```php
 'functions' => [
     OnUserCreated::class,
 ],
 ```
 
 ```php
+use Conductor\EventFunction;
+
 final class OnUserCreated extends EventFunction
 {
-    public function listenTo(): string
-    {
-        return 'user.created';
-    }
+    public function listenTo(): string { return 'user.created'; }
 
     public function handle(array $payload): void
     {
-        // handle the event
+        // executes as a queued job
     }
 }
 ```
 
-```php
-ConductorEvent::dispatch('user.created', ['user_id' => $user->id]);
-```
-
-### Scheduled Functions
-
-Register scheduled functions alongside event functions in `config/conductor.php`:
+### Register a Scheduled Function
 
 ```php
+use Conductor\ScheduledFunction;
+
 final class DailyReportFunction extends ScheduledFunction
 {
-    public function schedule(): string
-    {
-        return '0 9 * * *';
-    }
+    public function schedule(): string { return '0 9 * * *'; }
 
-    public function handle(): void
-    {
-        // generate and send report
-    }
+    public function handle(): void { /* generate report */ }
 }
 ```
 
-### Webhook Triggers
+```php
+// config/conductor.php
+'functions' => [
+    DailyReportFunction::class,
+],
+```
 
-Configure webhook sources in `config/conductor.php`:
+### Handle a Webhook
 
 ```php
+// config/conductor.php
 'webhooks' => [
     'stripe' => [
         'secret'   => env('STRIPE_WEBHOOK_SECRET'),
@@ -227,7 +184,29 @@ Configure webhook sources in `config/conductor.php`:
 ],
 ```
 
-Conductor verifies the HMAC signature before dispatching the bound function. Each source is accessible at `/conductor/webhook/{source}`.
+Conductor verifies the HMAC signature and dispatches `HandleStripeWebhook` as a tracked job. The endpoint is `POST /conductor/webhook/stripe`.
+
+---
+
+## Documentation
+
+Full documentation is in the [`docs/`](docs/) directory:
+
+| Guide | Description |
+|---|---|
+| [Installation & Setup](docs/installation.md) | Requirements, install steps, migrations, and queue setup |
+| [Configuration](docs/configuration.md) | Full `config/conductor.php` reference and environment variables |
+| [Tracked Jobs](docs/tracked-jobs.md) | `Trackable` trait, status lifecycle, tagging, cooperative cancellation |
+| [Durable Workflows](docs/workflows.md) | Multi-step workflows with step persistence, sleep, retry, and cancellation |
+| [Event Functions](docs/event-functions.md) | Named event dispatch and registered listener functions |
+| [Scheduled Functions](docs/scheduled-functions.md) | Cron-based PHP classes with dashboard visibility and toggle |
+| [Webhooks](docs/webhooks.md) | Inbound webhook ingestion with HMAC verification |
+| [Dashboard](docs/dashboard.md) | Dashboard pages, access control, and realtime log streaming |
+| [Artisan Commands](docs/commands.md) | `conductor:publish`, `conductor:prune`, `conductor:status` |
+| [API Reference](docs/api.md) | All JSON API endpoints |
+| [Advanced Topics](docs/advanced.md) | PHP-FPM/Octane caveats, payload redaction, upgrading |
+
+---
 
 ## Dashboard Development
 
@@ -255,25 +234,7 @@ After building, commit the updated `resources/dist/` directory alongside your so
 php artisan conductor:publish
 ```
 
-> **PHP-FPM caveat:** SSE log streams hold an HTTP connection open for the duration of a running job. FPM pool sizing must account for concurrent log viewers — each open stream occupies one FPM worker.
->
-> **Octane caveat:** Conductor log capture is not fiber-safe inside the Octane web worker process. Tracked jobs must run in separate `artisan queue:work` processes.
->
 > **Release enforcement:** CI verifies that `resources/dist/` matches the source before releases are tagged. Run `npm run build` and commit the output before opening a release PR.
-
-## Artisan Commands
-
-| Command | Description |
-|---|---|
-| `conductor:publish` | Publishes compiled frontend assets to `public/vendor/conductor/` |
-| `conductor:prune` | Prunes records older than `prune_after_days` from all Conductor tables |
-| `conductor:status` | Outputs a console health summary; exits with code `1` if any workers are offline |
-
-## PHP-FPM & Octane Notes
-
-**PHP-FPM**: Realtime log streaming via SSE holds an HTTP connection open for the duration of a job. Each open stream ties up one FPM worker process. Factor this into your FPM pool sizing for environments with many concurrent streams. Users on Laravel Octane (Swoole or RoadRunner) are unaffected.
-
-**Octane fibers**: Under Laravel Octane with coroutines or fibers enabled, queue jobs must run as separate `artisan queue:work` processes — not as inline tasks within the Octane web server process — when using Conductor's log capture feature. The static log context holder is not fiber-safe and would cause cross-job log contamination otherwise.
 
 ## Testing
 
