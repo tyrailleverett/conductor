@@ -11,15 +11,39 @@ Implement an entire phase plan end-to-end using a gitflow workflow. The plan fil
 
 ## Workflow
 
-Follow these steps exactly in order. Do not skip steps.
+### Step 1: Validate Inputs & Auto-Detect Phase
 
-### Step 1: Validate Inputs
+#### 1a. Determine the Phase File
 
-1. Verify `$ARGUMENTS` is provided and points to an existing file
-2. Read the plan file
-3. Extract the phase number and title from the filename (e.g., `Plan_v1___Phase_1__Environments_and_API_Keys.md` → Phase 1, "Environments and API Keys")
-4. Parse all numbered sections by scanning for `## - [ ]` headings — each heading through the next `---` or next heading is one section
-5. Abort with a clear error if the file doesn't exist or contains no parseable sections
+**IF** `$ARGUMENTS` is provided:
+1. Verify it points to an existing file
+2. Use that file as the plan file
+3. Jump to Step 1c
+
+**IF** `$ARGUMENTS` is NOT provided:
+1. List all plan files in `specs/` matching the pattern `Plan_v1___Phase_*.md`
+2. For each file, count:
+   - Total sections: number of lines matching `## - [x]` or `## - [ ]`
+   - Completed sections: number of lines matching `## - [x]`
+3. Find the highest phase number where `completed sections == total sections` (100% complete)
+4. If a fully completed phase exists:
+   - The next phase = completed phase number + 1
+   - Look for `Plan_v1___Phase_{N}.md` where N = next phase
+   - If that file exists, use it (this is the phase to execute)
+   - If that file does NOT exist, report: "All available phases (1–{highest}) are complete. No next phase found." Abort.
+5. If NO fully completed phase exists:
+   - Use Phase 1: `Plan_v1___Phase_1.md`
+   - If Phase 1 file does not exist, abort with error: "No plan file provided and Phase 1 not found in specs/"
+
+#### 1b. Read and Parse the Plan File
+
+1. Read the selected plan file
+2. Extract the phase number and title from the filename (e.g., `Plan_v1___Phase_1__Package_Foundation_and_Configuration.md` → Phase 1, "Package Foundation and Configuration")
+3. Parse all numbered sections by scanning for `## - [ ]` or `## - [x]` headings — each heading through the next `---` or next heading is one section
+4. Abort with a clear error if the file contains no parseable sections
+
+#### 1c. Cross-Phase Dependency & Resume Detection
+
 6. **Cross-phase dependency check** — If the phase number is greater than 1, verify Phase {N-1} was completed on develop: `git log develop --oneline | grep "Phase {N-1}\."`). If nothing is found, warn the user: "Phase {N-1} has not been completed on develop. Phase {N} may depend on work from Phase {N-1}." Ask the user for confirmation before proceeding. If the user declines, abort.
 7. **Resume detection** — Derive the branch name from the plan filename (see @.claude/skills/execute-phase/references/git-workflow.md). Check if the branch already exists (`git branch --list <branch-name>`). If it exists and has uncommitted changes (`git status --porcelain`), warn: "Branch <branch-name> already exists with uncommitted changes. Re-running will re-implement all sections, overwriting existing changes." Ask for confirmation. If confirmed, checkout the branch and continue from Step 4. If the user declines, abort.
 

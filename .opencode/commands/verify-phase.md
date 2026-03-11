@@ -14,18 +14,36 @@ Verify the uncommitted implementation of a phase plan. Compares working director
 
 Follow these steps exactly in order. Do not skip steps.
 
-### Step 1: Validate Inputs
+### Step 1: Validate Inputs & Auto-Detect Phase
 
-1. Parse `$ARGUMENTS` — expect a single value: the plan file path
-2. Read the plan file, extract the phase number and title from the filename (e.g., `Plan_v1___Phase_2__API_Keys.md` → Phase 2, "API Keys")
-3. Parse all sections by scanning for `## - [ ]` headings — each heading through the next `---` or next heading is one section
+#### 1a. Determine the Phase File
+
+**IF** `$ARGUMENTS` is provided:
+1. Use the provided value as the plan file path
+2. Jump to Step 1b
+
+**IF** `$ARGUMENTS` is NOT provided:
+1. Get the current git branch name: `git branch --show-current`
+2. Parse the branch name to extract the phase number (e.g., `feature/phase-2-data-layer` → Phase 2)
+3. Look for the corresponding plan file: `specs/Plan_v1___Phase_{N}__.md` (where N = phase number extracted from branch)
+4. If the file exists, use it
+5. If the file does NOT exist, abort with error: "Could not auto-detect plan file from branch name. Please provide the plan file path as an argument."
+
+#### 1b. Read and Parse the Plan File
+
+1. Read the plan file
+2. Extract the phase number and title from the filename (e.g., `Plan_v1___Phase_2__Data_Layer.md` → Phase 2, "Data Layer")
+3. Parse all sections by scanning for `## - [x]` or `## - [ ]` headings — each heading through the next `---` or next heading is one section
+4. Abort with a clear error if the plan file does not exist or contains no parseable sections
+
+#### 1c. Verify Current Branch and Working State
+
 4. Derive the expected branch name from the plan filename (see @.claude/skills/execute-phase/references/git-workflow.md for branch naming rules)
 5. Confirm the current branch is the expected feature branch: `git branch --show-current`
 6. Run `git status --porcelain` to confirm there are uncommitted changes to verify
 7. Abort with a clear error if:
-   - `$ARGUMENTS` is missing
    - The plan file does not exist
-   - The plan file contains no parseable `## - [ ]` sections
+   - The plan file contains no parseable `## - [x]` or `## - [ ]` sections
    - The current branch is not the expected feature branch
    - There are no uncommitted changes (`git status --porcelain` returns empty)
 
