@@ -53,7 +53,7 @@
         "prepare": "@php vendor/bin/testbench package:discover --ansi",
         "analyse": "vendor/bin/phpstan analyse",
         "lint": [
-            "./vendor/bin/duster fix",
+            "./vendor/bin/duster fix --using=tlint,phpcsfixer,pint",
             "./vendor/bin/rector"
         ],
         "test": "vendor/bin/pest",

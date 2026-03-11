@@ -8,14 +8,20 @@ use HotReloadStudios\Conductor\Concerns\Trackable;
 use HotReloadStudios\Conductor\Enums\JobStatus;
 use HotReloadStudios\Conductor\Exceptions\JobCancelledException;
 use HotReloadStudios\Conductor\Http\Middleware\Authorize;
+use HotReloadStudios\Conductor\Http\Middleware\WebhookRateLimit;
 use HotReloadStudios\Conductor\Logging\ConductorLogHandler;
 use HotReloadStudios\Conductor\Models\ConductorJob;
+use HotReloadStudios\Conductor\Services\EventDispatchService;
 use HotReloadStudios\Conductor\Services\JobCancellationService;
 use HotReloadStudios\Conductor\Services\JobRetryService;
 use HotReloadStudios\Conductor\Services\PayloadRedactor;
+use HotReloadStudios\Conductor\Services\ScheduleRegistrar;
+use HotReloadStudios\Conductor\Services\ScheduleToggleService;
+use HotReloadStudios\Conductor\Services\WebhookVerifier;
 use HotReloadStudios\Conductor\Services\WorkflowCancellationService;
 use HotReloadStudios\Conductor\Services\WorkflowEngine;
 use HotReloadStudios\Conductor\Support\ConductorContext;
+use Illuminate\Console\Scheduling\Schedule as LaravelSchedule;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
@@ -61,6 +67,10 @@ final class ConductorServiceProvider extends PackageServiceProvider
         $this->app->singleton(JobCancellationService::class);
         $this->app->singleton(WorkflowEngine::class);
         $this->app->singleton(WorkflowCancellationService::class);
+        $this->app->singleton(EventDispatchService::class);
+        $this->app->singleton(ScheduleRegistrar::class);
+        $this->app->singleton(ScheduleToggleService::class);
+        $this->app->singleton(WebhookVerifier::class);
     }
 
     public function packageBooted(): void
@@ -70,7 +80,7 @@ final class ConductorServiceProvider extends PackageServiceProvider
             ->group(__DIR__.'/../routes/api.php');
 
         Route::prefix((string) config('conductor.path').'/webhook')
-            ->middleware((array) config('conductor.middleware', ['web']))
+            ->middleware(array_merge((array) config('conductor.middleware', ['web']), [WebhookRateLimit::class]))
             ->group(__DIR__.'/../routes/webhook.php');
 
         if (! $this->app->environment('local') && ! $this->hasAuthCallbackConfigured()) {
@@ -81,6 +91,10 @@ final class ConductorServiceProvider extends PackageServiceProvider
 
         // Register the log handler once — it self-guards via ConductorContext::isActive().
         $this->registerLogHandler();
+
+        $this->app->afterResolving(LaravelSchedule::class, function (LaravelSchedule $schedule): void {
+            app(ScheduleRegistrar::class)->register($schedule);
+        });
     }
 
     private function registerLogHandler(): void
@@ -185,22 +199,27 @@ final class ConductorServiceProvider extends PackageServiceProvider
                 return;
             }
 
+            /** @var ConductorJob|null $conductorJob */
             $conductorJob = ConductorJob::find($conductorJobId);
 
-            if ($conductorJob !== null) {
-                $finalStatus = $conductorJob->status === JobStatus::CancellationRequested
-                    ? JobStatus::Cancelled
-                    : JobStatus::Completed;
+            if (! $conductorJob instanceof ConductorJob) {
+                ConductorContext::clear();
 
-                $conductorJob->update([
-                    'status' => $finalStatus,
-                    'completed_at' => now(),
-                    'cancelled_at' => $finalStatus === JobStatus::Cancelled ? now() : null,
-                    'duration_ms' => $conductorJob->started_at !== null
-                        ? (int) $conductorJob->started_at->diffInMilliseconds(now())
-                        : null,
-                ]);
+                return;
             }
+
+            $finalStatus = $conductorJob->status === JobStatus::CancellationRequested
+                ? JobStatus::Cancelled
+                : JobStatus::Completed;
+
+            $conductorJob->update([
+                'status' => $finalStatus,
+                'completed_at' => now(),
+                'cancelled_at' => $finalStatus === JobStatus::Cancelled ? now() : null,
+                'duration_ms' => $conductorJob->started_at !== null
+                    ? (int) $conductorJob->started_at->diffInMilliseconds(now())
+                    : null,
+            ]);
 
             ConductorContext::clear();
         });
@@ -214,22 +233,27 @@ final class ConductorServiceProvider extends PackageServiceProvider
                 return;
             }
 
+            /** @var ConductorJob|null $conductorJob */
             $conductorJob = ConductorJob::find($conductorJobId);
 
-            if ($conductorJob !== null) {
-                $isCancellation = $event->exception instanceof JobCancelledException;
+            if (! $conductorJob instanceof ConductorJob) {
+                ConductorContext::clear();
 
-                $conductorJob->update([
-                    'status' => $isCancellation ? JobStatus::Cancelled : JobStatus::Failed,
-                    'failed_at' => $isCancellation ? null : now(),
-                    'cancelled_at' => $isCancellation ? now() : null,
-                    'error_message' => $isCancellation ? null : $event->exception->getMessage(),
-                    'stack_trace' => $isCancellation ? null : $event->exception->getTraceAsString(),
-                    'duration_ms' => $conductorJob->started_at !== null
-                        ? (int) $conductorJob->started_at->diffInMilliseconds(now())
-                        : null,
-                ]);
+                return;
             }
+
+            $isCancellation = $event->exception instanceof JobCancelledException;
+
+            $conductorJob->update([
+                'status' => $isCancellation ? JobStatus::Cancelled : JobStatus::Failed,
+                'failed_at' => $isCancellation ? null : now(),
+                'cancelled_at' => $isCancellation ? now() : null,
+                'error_message' => $isCancellation ? null : $event->exception->getMessage(),
+                'stack_trace' => $isCancellation ? null : $event->exception->getTraceAsString(),
+                'duration_ms' => $conductorJob->started_at !== null
+                    ? (int) $conductorJob->started_at->diffInMilliseconds(now())
+                    : null,
+            ]);
 
             ConductorContext::clear();
         });
