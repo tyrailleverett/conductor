@@ -12,7 +12,7 @@ Phase 5 implements three related feature systems that share the pattern of "regi
 
 ---
 
-## - [ ] 1. EventFunction Base Class
+## - [x] 1. EventFunction Base Class
 
 **`src/EventFunction.php`**
 
@@ -31,7 +31,7 @@ The class is NOT `final` — it is `abstract` and intended for extension.
 
 ---
 
-## - [ ] 2. Event Dispatch Service
+## - [x] 2. Event Dispatch Service
 
 **`src/Services/EventDispatchService.php`**
 
@@ -78,7 +78,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 3. EventFunctionJob
+## - [x] 3. EventFunctionJob
 
 **`src/Jobs/EventFunctionJob.php`**
 
@@ -112,7 +112,7 @@ A `ShouldQueue` job that executes a single event function for a specific event.
 
 ---
 
-## - [ ] 4. ScheduledFunction Base Class
+## - [x] 4. ScheduledFunction Base Class
 
 **`src/ScheduledFunction.php`**
 
@@ -131,7 +131,7 @@ The class is NOT `final` — `abstract`.
 
 ---
 
-## - [ ] 5. Schedule Registration
+## - [x] 5. Schedule Registration
 
 **`src/Services/ScheduleRegistrar.php`**
 
@@ -164,7 +164,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 6. Schedule Toggle Service
+## - [x] 6. Schedule Toggle Service
 
 **`src/Services/ScheduleToggleService.php`**
 
@@ -181,7 +181,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 7. WebhookFunction Base Class
+## - [x] 7. WebhookFunction Base Class
 
 **`src/WebhookFunction.php`**
 
@@ -199,7 +199,7 @@ The class is NOT `final` — `abstract`.
 
 ---
 
-## - [ ] 8. Webhook Signature Verification
+## - [x] 8. Webhook Signature Verification
 
 **`src/Services/WebhookVerifier.php`**
 
@@ -218,7 +218,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 9. Webhook Controller
+## - [x] 9. Webhook Controller
 
 **`src/Http/Controllers/WebhookController.php`**
 
@@ -265,7 +265,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 10. Webhook Rate Limiting
+## - [x] 10. Webhook Rate Limiting
 
 **`src/Http/Middleware/WebhookRateLimit.php`**
 
@@ -282,7 +282,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 11. Webhook Route Registration
+## - [x] 11. Webhook Route Registration
 
 **Update `routes/webhook.php`:**
 
@@ -296,7 +296,7 @@ In the webhook route group registration (from Phase 1), add the `WebhookRateLimi
 
 ---
 
-## - [ ] 12. Service Provider Bindings
+## - [x] 12. Service Provider Bindings
 
 **Update `src/ConductorServiceProvider.php`:**
 
@@ -311,7 +311,7 @@ In `packageBooted()`:
 
 ---
 
-## - [ ] 13. Tests
+## - [x] 13. Tests
 
 ### Unit Tests
 

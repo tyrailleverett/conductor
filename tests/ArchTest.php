@@ -14,4 +14,9 @@ arch('conductor classes are final')
     ->expect('HotReloadStudios\\Conductor')
     ->classes()
     ->toBeFinal()
-    ->ignoring('HotReloadStudios\\Conductor\\Workflow');
+    ->ignoring([
+        'HotReloadStudios\\Conductor\\Workflow',
+        'HotReloadStudios\\Conductor\\EventFunction',
+        'HotReloadStudios\\Conductor\\ScheduledFunction',
+        'HotReloadStudios\\Conductor\\WebhookFunction',
+    ]);
