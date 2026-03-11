@@ -84,7 +84,21 @@ After all individual sections are verified, run the **Cross-Section Checks** des
    - Re-run: `composer test`
 5. If tests are still failing after 3 attempts, stop and report to the user — **do not push**
 
-### Step 5: Finalize
+### Step 5: Code Review
+
+Perform a thorough code review of all staged and changed files using the guidelines in @.opencode/commands/code-review.md. This includes:
+
+- All PHP and code standards checks
+- Security, performance, and architecture reviews
+- Testing coverage verification
+- Laravel package conventions
+
+Record the verdict:
+- ✅ **Approved** — proceed to Step 6
+- ⚠️ **Approved with suggestions** — proceed to Step 6 (suggestions can be addressed in future iterations)
+- 🚫 **Changes required** — stop and report to the user with specific issues; do not push
+
+### Step 6: Finalize
 
 Follow the **Finalization** procedure in @.claude/skills/execute-phase/references/git-workflow.md:
 
@@ -96,7 +110,7 @@ Follow the **Finalization** procedure in @.claude/skills/execute-phase/reference
 6. Delete the local feature branch: `git branch -D <branch-name>`
 7. Delete the remote feature branch if it exists: `git push origin --delete <branch-name>`
 
-### Step 6: Report to User
+### Step 7: Report to User
 
 Follow @.claude/skills/verify-phase/references/report-format.md for the report template.
 
@@ -106,3 +120,16 @@ Print the verification summary to the terminal:
 - Test suite result
 - Formatting result
 - Confirmation that changes were pushed to `develop` and the feature branch was deleted
+
+### Step 8: Merge on PASS
+
+If the overall status is **PASS** (no DEVIATION or MISSING findings):
+
+1. Ask the user if they want to merge the PR to `develop`
+2. If yes:
+   - Merge: `gh pr merge <PR> --merge`
+   - Confirm merge succeeded: `gh pr view <PR> --json state -q .state` (should return `MERGED`)
+   - Report: "Phase {N} merged to develop."
+3. If no, report: "PR remains open for manual review."
+
+If the overall status is not PASS, skip this step — the GitHub issue tracks what needs fixing.

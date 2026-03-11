@@ -18,8 +18,8 @@ it('serves the blade shell for deep-linked spa paths', function (): void {
     $this->get('/conductor/jobs/some-uuid')->assertSuccessful();
 });
 
-it('reserves the api prefix for api routes', function (): void {
-    $this->get('/conductor/api/jobs')->assertNotFound();
+it('serves the api prefix via api route group', function (): void {
+    $this->getJson('/conductor/api/jobs')->assertSuccessful();
 });
 
 it('reserves the webhook prefix for webhook routes', function (): void {
