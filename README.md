@@ -229,6 +229,38 @@ Configure webhook sources in `config/conductor.php`:
 
 Conductor verifies the HMAC signature before dispatching the bound function. Each source is accessible at `/conductor/webhook/{source}`.
 
+## Dashboard Development
+
+Conductor ships with a pre-compiled React SPA in `resources/dist/`. This directory is committed to git so host applications do not need any frontend tooling. If you are contributing to or customising the dashboard source in `resources/js/`, follow these steps:
+
+**Install frontend dependencies:**
+```bash
+npm install
+```
+
+**Start development server with HMR:**
+```bash
+npm run dev
+```
+
+**Build for production:**
+```bash
+npm run build
+```
+
+After building, commit the updated `resources/dist/` directory alongside your source changes.
+
+**Publish assets to the host application:**
+```bash
+php artisan conductor:publish
+```
+
+> **PHP-FPM caveat:** SSE log streams hold an HTTP connection open for the duration of a running job. FPM pool sizing must account for concurrent log viewers — each open stream occupies one FPM worker.
+>
+> **Octane caveat:** Conductor log capture is not fiber-safe inside the Octane web worker process. Tracked jobs must run in separate `artisan queue:work` processes.
+>
+> **Release enforcement:** CI verifies that `resources/dist/` matches the source before releases are tagged. Run `npm run build` and commit the output before opening a release PR.
+
 ## Artisan Commands
 
 | Command | Description |
