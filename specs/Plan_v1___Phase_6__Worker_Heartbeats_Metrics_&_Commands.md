@@ -12,7 +12,7 @@ Phase 6 adds operational infrastructure: worker heartbeat collection via queue l
 
 ---
 
-## - [ ] 1. Worker Heartbeat Service
+## - [x] 1. Worker Heartbeat Service
 
 **`src/Services/WorkerHeartbeatService.php`**
 
@@ -38,7 +38,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 2. Worker Heartbeat Event Listener
+## - [x] 2. Worker Heartbeat Event Listener
 
 **`src/Listeners/WorkerHeartbeatListener.php`**
 
@@ -89,7 +89,7 @@ sequenceDiagram
 
 ---
 
-## - [ ] 3. Metric Snapshot Service
+## - [x] 3. Metric Snapshot Service
 
 **`src/Services/MetricSnapshotService.php`**
 
@@ -106,7 +106,7 @@ The class is `final`.
 
 ---
 
-## - [ ] 4. `conductor:prune` Artisan Command
+## - [x] 4. `conductor:prune` Artisan Command
 
 **`src/Commands/PruneCommand.php`**
 
@@ -135,7 +135,7 @@ Deletes records older than the configured retention period.
 
 ---
 
-## - [ ] 5. `conductor:status` Artisan Command
+## - [x] 5. `conductor:status` Artisan Command
 
 **`src/Commands/StatusCommand.php`**
 
@@ -154,7 +154,7 @@ Outputs a console health summary.
 
 ---
 
-## - [ ] 6. `conductor:publish` Artisan Command
+## - [x] 6. `conductor:publish` Artisan Command
 
 **`src/Commands/PublishCommand.php`**
 
@@ -170,7 +170,7 @@ Convenience command for publishing frontend assets.
 
 ---
 
-## - [ ] 7. Service Provider Command Registration
+## - [x] 7. Service Provider Command Registration
 
 **Update `src/ConductorServiceProvider.php`:**
 
@@ -188,7 +188,7 @@ Also register the asset publishing tag in `configurePackage()`:
 
 ---
 
-## - [ ] 8. Metric Snapshot Scheduling
+## - [x] 8. Metric Snapshot Scheduling
 
 **Update the schedule registration in `ConductorServiceProvider::packageBooted()`:**
 
@@ -197,7 +197,7 @@ Add to the `afterResolving(Schedule::class, ...)` callback:
 
 ---
 
-## - [ ] 9. Service Provider Bindings
+## - [x] 9. Service Provider Bindings
 
 **Update `src/ConductorServiceProvider.php`:**
 
@@ -207,7 +207,7 @@ In `packageRegistered()`, add singleton bindings:
 
 ---
 
-## - [ ] 10. Tests
+## - [x] 10. Tests
 
 ### Unit Tests
 
