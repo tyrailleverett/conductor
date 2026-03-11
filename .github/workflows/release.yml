@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [created]
+
+jobs:
+  verify-assets:
+    runs-on: ubuntu-latest
+    name: Verify compiled assets are up to date
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Verify resources/dist is up to date
+        run: |
+          if ! git diff --exit-code -- resources/dist; then
+            echo "::error::Compiled assets in resources/dist/ are out of date. Run 'npm run build' and commit the result."
+            exit 1
+          fi

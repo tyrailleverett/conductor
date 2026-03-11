@@ -40,7 +40,7 @@ The `art/` directory contains approved design screenshots for every page in the 
 
 ---
 
-## - [ ] 1. Frontend Tooling Setup
+## - [x] 1. Frontend Tooling Setup
 
 ### 1.1 Update `package.json`
 
@@ -89,7 +89,7 @@ Standard React TypeScript config:
 
 ---
 
-## - [ ] 2. Blade Shell Manifest Reader
+## - [x] 2. Blade Shell Manifest Reader
 
 **Update `resources/views/index.blade.php`** (created in Phase 1):
 
@@ -116,7 +116,7 @@ This provides the SPA with the route prefix needed for API URL construction. CSR
 
 ---
 
-## - [ ] 3. CSS Entry Point
+## - [x] 3. CSS Entry Point
 
 **`resources/js/app.css`**
 
@@ -132,7 +132,7 @@ Define the Conductor-specific color tokens (shadcn/ui convention) as CSS custom 
 
 ---
 
-## - [ ] 4. SPA Entry Point & API Client
+## - [x] 4. SPA Entry Point & API Client
 
 ### 4.1 `resources/js/main.tsx`
 
@@ -168,7 +168,7 @@ Utility functions:
 
 ---
 
-## - [ ] 5. TypeScript Types
+## - [x] 5. TypeScript Types
 
 **`resources/js/types/index.ts`**
 
@@ -308,7 +308,7 @@ interface PaginatedResponse<T> {
 
 ---
 
-## - [ ] 6. Shared UI Components
+## - [x] 6. Shared UI Components
 
 Create reusable UI components in `resources/js/components/ui/` following shadcn/ui patterns. Each component is a single file exporting a React component.
 
@@ -333,7 +333,7 @@ All components use `cn()` for className composition and accept standard HTML att
 
 ---
 
-## - [ ] 7. Application Shell & Navigation
+## - [x] 7. Application Shell & Navigation
 
 **`resources/js/components/App.tsx`**
 
@@ -353,7 +353,7 @@ The dashboard shell:
 
 ---
 
-## - [ ] 8. Page Components
+## - [x] 8. Page Components
 
 All pages in `resources/js/pages/`. Each page fetches data from the API on mount using `useEffect` and `apiGet`.
 
@@ -505,7 +505,7 @@ All pages in `resources/js/pages/`. Each page fetches data from the API on mount
 
 ---
 
-## - [ ] 9. React Router Configuration
+## - [x] 9. React Router Configuration
 
 **Inside `App.tsx`:**
 
@@ -524,7 +524,7 @@ All pages in `resources/js/pages/`. Each page fetches data from the API on mount
 
 ---
 
-## - [ ] 10. SSE Log Streaming Hook
+## - [x] 10. SSE Log Streaming Hook
 
 **`resources/js/hooks/useLogStream.ts`**
 
@@ -546,7 +546,7 @@ A custom React hook for SSE log streaming with polling fallback.
 
 ---
 
-## - [ ] 11. Asset Build & Publishing
+## - [x] 11. Asset Build & Publishing
 
 ### 11.1 Build Output
 
@@ -584,7 +584,7 @@ Create `.github/workflows/release.yml` to enforce up-to-date compiled assets bef
 
 ---
 
-## - [ ] 12. Development Workflow Documentation
+## - [x] 12. Development Workflow Documentation
 
 Add a section to the package README (or CONTRIBUTING.md if it exists) documenting:
 
@@ -599,7 +599,7 @@ Add a section to the package README (or CONTRIBUTING.md if it exists) documentin
 
 ---
 
-## - [ ] 13. Tests
+## - [x] 13. Tests
 
 ### Feature Tests
 
@@ -612,7 +612,7 @@ Add a section to the package README (or CONTRIBUTING.md if it exists) documentin
 
 ---
 
-## - [ ] 14. SPA Architecture Diagram
+## - [x] 14. SPA Architecture Diagram
 
 ```mermaid
 graph TD

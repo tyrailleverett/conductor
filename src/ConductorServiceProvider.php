@@ -67,11 +67,6 @@ final class ConductorServiceProvider extends PackageServiceProvider
             ])
             ->hasRoute('web')
             ->hasCommands([PruneCommand::class, StatusCommand::class, PublishCommand::class]);
-
-        $this->publishes(
-            [__DIR__.'/../resources/dist' => public_path('vendor/conductor')],
-            'conductor-assets',
-        );
     }
 
     public function packageRegistered(): void
@@ -103,6 +98,17 @@ final class ConductorServiceProvider extends PackageServiceProvider
         if (! $this->app->environment('local') && ! $this->hasAuthCallbackConfigured()) {
             Log::warning('Conductor dashboard and API routes will return 403 until Conductor::auth() is configured.');
         }
+
+        $this->publishes([
+            __DIR__.'/../resources/dist' => public_path('vendor/conductor'),
+        ], 'conductor-assets');
+
+        $conductorManifestPath = __DIR__.'/../resources/dist/.vite/manifest.json';
+        $this->callAfterResolving('view', function () use ($conductorManifestPath): void {
+            app('view')->composer('conductor::index', function ($view) use ($conductorManifestPath): void {
+                $view->with('conductorManifestPath', $conductorManifestPath);
+            });
+        });
 
         $this->registerQueueListeners();
         $this->registerWorkerHeartbeatListeners();
