@@ -27,6 +27,10 @@ final class JobRetryService
         $serialized = Crypt::decryptString($encrypted);
         $originalJob = unserialize($serialized);
 
+        if (is_object($originalJob) && property_exists($originalJob, 'conductorJobId')) {
+            $originalJob->conductorJobId = $job->id;
+        }
+
         $job->update([
             'status' => JobStatus::Pending,
             'failed_at' => null,
@@ -35,7 +39,6 @@ final class JobRetryService
             'completed_at' => null,
             'cancelled_at' => null,
             'duration_ms' => null,
-            'attempts' => $job->attempts + 1,
         ]);
 
         dispatch($originalJob)->onQueue($job->queue)->onConnection($job->connection);

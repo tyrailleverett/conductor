@@ -42,10 +42,12 @@ it('retries a failed job', function (): void {
 
     $conductorJob->refresh();
 
-    expect($conductorJob->status)->toBe(JobStatus::Pending)
+    expect(ConductorJob::count())->toBe(1)
+        ->and($conductorJob->status)->toBe(JobStatus::Completed)
         ->and($conductorJob->failed_at)->toBeNull()
         ->and($conductorJob->error_message)->toBeNull()
-        ->and($conductorJob->attempts)->toBe(2);
+        ->and($conductorJob->attempts)->toBe(2)
+        ->and($conductorJob->completed_at)->not->toBeNull();
 });
 
 it('rejects retry on a non-failed job', function (): void {
