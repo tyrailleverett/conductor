@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Button } from './button';
+import { Button } from '@/components/ui/button';
 
 interface PaginationProps {
     currentPage: number;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router';
-import Layout from './Layout';
+import Layout from '@/components/Layout';
 import Overview from '@/pages/Overview';
 import Jobs from '@/pages/Jobs';
 import JobDetail from '@/pages/JobDetail';
