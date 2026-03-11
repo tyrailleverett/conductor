@@ -121,3 +121,16 @@ Print the verification summary to the terminal:
 - Test suite result
 - Formatting result
 - Confirmation that changes were pushed to `develop` and the feature branch was deleted
+
+### Step 8: Merge on PASS
+
+If the overall status is **PASS** (no DEVIATION or MISSING findings):
+
+1. Ask the user if they want to merge the PR to `develop`
+2. If yes:
+   - Merge: `gh pr merge <PR> --merge`
+   - Confirm merge succeeded: `gh pr view <PR> --json state -q .state` (should return `MERGED`)
+   - Report: "Phase {N} merged to develop."
+3. If no, report: "PR remains open for manual review."
+
+If the overall status is not PASS, skip this step — the GitHub issue tracks what needs fixing.

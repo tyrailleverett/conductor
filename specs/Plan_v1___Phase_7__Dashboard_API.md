@@ -14,7 +14,7 @@ These endpoints are package-owned transport surfaces for the standalone SPA. The
 
 ---
 
-## - [ ] 1. Eloquent API Resources
+## - [x] 1. Eloquent API Resources
 
 Create API resources in `src/Http/Resources/`. Each is `final` and defines `toArray(Request $request): array`.
 
@@ -149,7 +149,7 @@ Create API resources in `src/Http/Resources/`. Each is `final` and defines `toAr
 
 ---
 
-## - [ ] 2. Job API Controller
+## - [x] 2. Job API Controller
 
 **`src/Http/Controllers/Api/JobController.php`**
 
@@ -185,7 +185,7 @@ A resource-style controller (not invokable). All methods return JSON.
 
 ---
 
-## - [ ] 3. SSE Stream Controller
+## - [x] 3. SSE Stream Controller
 
 **`src/Http/Controllers/Api/JobStreamController.php`**
 
@@ -233,7 +233,7 @@ sequenceDiagram
 
 ---
 
-## - [ ] 4. Workflow API Controller
+## - [x] 4. Workflow API Controller
 
 **`src/Http/Controllers/Api/WorkflowController.php`**
 
@@ -258,7 +258,7 @@ sequenceDiagram
 
 ---
 
-## - [ ] 5. Event API Controller
+## - [x] 5. Event API Controller
 
 **`src/Http/Controllers/Api/EventController.php`**
 
@@ -277,7 +277,7 @@ sequenceDiagram
 
 ---
 
-## - [ ] 6. Schedule API Controller
+## - [x] 6. Schedule API Controller
 
 **`src/Http/Controllers/Api/ScheduleController.php`**
 
@@ -294,7 +294,7 @@ sequenceDiagram
 
 ---
 
-## - [ ] 7. Worker API Controller
+## - [x] 7. Worker API Controller
 
 **`src/Http/Controllers/Api/WorkerController.php`**
 
@@ -307,7 +307,7 @@ sequenceDiagram
 
 ---
 
-## - [ ] 8. Metrics API Controller
+## - [x] 8. Metrics API Controller
 
 **`src/Http/Controllers/Api/MetricsController.php`**
 
@@ -335,7 +335,7 @@ The `queue_depth` data is additionally grouped by `queue` value.
 
 ---
 
-## - [ ] 9. API Route Registration
+## - [x] 9. API Route Registration
 
 **Update `routes/api.php`:**
 
@@ -362,7 +362,7 @@ Register all API endpoints:
 
 ---
 
-## - [ ] 10. Tests
+## - [x] 10. Tests
 
 ### Feature Tests
 
