@@ -87,7 +87,9 @@ it('executes all steps in sequence', function (): void {
     $engine->run($workflow);
 
     $workflow->refresh();
-    expect($workflow->status)->toBe(WorkflowStatus::Completed);
+    expect($workflow->status)->toBe(WorkflowStatus::Completed)
+        ->and($workflow->output)->toBe(['value' => 'c'])
+        ->and($workflow->next_run_at)->toBeNull();
 
     $steps = ConductorWorkflowStep::where('workflow_id', $workflow->id)->get();
     expect($steps)->toHaveCount(3);

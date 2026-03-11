@@ -17,6 +17,8 @@ final class WorkflowContext
 
     private bool $shouldPause = false;
 
+    private mixed $lastResult = null;
+
     public function __construct(
         private readonly ConductorWorkflow $workflow,
         private readonly WorkflowEngine $engine,
@@ -35,9 +37,10 @@ final class WorkflowContext
             ->first();
 
         if ($step !== null && $step->status === StepStatus::Completed) {
+            $this->lastResult = $this->restoreOutput($step->output);
             $this->stepIndex++;
 
-            return $step->output;
+            return $this->lastResult;
         }
 
         if ($step !== null && $step->status === StepStatus::Skipped) {
@@ -47,6 +50,8 @@ final class WorkflowContext
         }
 
         $result = $this->engine->executeStep($this->workflow, $this->stepIndex, $name, $callback);
+
+        $this->lastResult = $result;
 
         $this->stepIndex++;
 
@@ -62,7 +67,10 @@ final class WorkflowContext
         }
 
         if ($this->workflow->sleep_until !== null && $this->workflow->sleep_until->isPast()) {
-            $this->workflow->update(['sleep_until' => null]);
+            $this->workflow->update([
+                'sleep_until' => null,
+                'next_run_at' => null,
+            ]);
 
             return;
         }
@@ -83,5 +91,23 @@ final class WorkflowContext
     public function getStepIndex(): int
     {
         return $this->stepIndex;
+    }
+
+    public function getLastResult(): mixed
+    {
+        return $this->lastResult;
+    }
+
+    private function restoreOutput(?array $output): mixed
+    {
+        if ($output === null) {
+            return null;
+        }
+
+        if (array_key_exists('value', $output) && count($output) === 1) {
+            return $output['value'];
+        }
+
+        return $output;
     }
 }

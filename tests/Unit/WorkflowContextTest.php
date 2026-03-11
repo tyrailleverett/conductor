@@ -33,7 +33,7 @@ it('replays completed steps without re-executing', function (): void {
     });
 
     expect($executed)->toBeFalse()
-        ->and($result)->toBe(['value' => 'cached-result']);
+        ->and($result)->toBe('cached-result');
 });
 
 it('skips steps after sleep', function (): void {

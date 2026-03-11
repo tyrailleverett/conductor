@@ -26,11 +26,17 @@ final class WorkflowStepJob implements ShouldQueue
     public function __construct(public readonly int $workflowId)
     {
         $this->queue = (string) config('conductor.queue.queue');
-        $this->connection = (string) config('conductor.queue.connection');
+
+        $connection = config('conductor.queue.connection');
+
+        if (is_string($connection) && $connection !== '') {
+            $this->connection = $connection;
+        }
     }
 
     public function handle(WorkflowEngine $engine): void
     {
+        /** @var ConductorWorkflow|null $workflow */
         $workflow = ConductorWorkflow::find($this->workflowId);
 
         if ($workflow === null || $workflow->isTerminal()) {
@@ -42,6 +48,7 @@ final class WorkflowStepJob implements ShouldQueue
 
     public function failed(Throwable $e): void
     {
+        /** @var ConductorWorkflow|null $workflow */
         $workflow = ConductorWorkflow::find($this->workflowId);
 
         if ($workflow !== null && ! $workflow->isTerminal()) {
