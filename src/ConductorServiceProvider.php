@@ -311,14 +311,21 @@ final class ConductorServiceProvider extends PackageServiceProvider
             return null;
         }
 
-        $command = unserialize($commandRaw);
+        $commandClass = $this->extractSerializedCommandClass($commandRaw);
 
-        if (! is_object($command) || ! $this->usesTrackableTrait($command)) {
+        if ($commandClass === null || ! $this->classUsesTrackableTrait($commandClass)) {
             return null;
         }
 
-        /** @var mixed $command */
-        return $command->conductorJobId;
+        if (! preg_match('/s:\\d+:"conductorJobId";(?:i:(\\d+);|N;)/', $commandRaw, $matches)) {
+            return null;
+        }
+
+        if (! isset($matches[1])) {
+            return null;
+        }
+
+        return (int) $matches[1];
     }
 
     private function usesTrackableTrait(mixed $object): bool
@@ -328,6 +335,24 @@ final class ConductorServiceProvider extends PackageServiceProvider
         }
 
         return in_array(Trackable::class, class_uses_recursive($object), true);
+    }
+
+    private function classUsesTrackableTrait(string $className): bool
+    {
+        if (! class_exists($className)) {
+            return false;
+        }
+
+        return in_array(Trackable::class, class_uses_recursive($className), true);
+    }
+
+    private function extractSerializedCommandClass(string $serializedCommand): ?string
+    {
+        if (! preg_match('/^O:\\d+:"([^"]+)":\\d+:/', $serializedCommand, $matches)) {
+            return null;
+        }
+
+        return $matches[1];
     }
 
     private function hasAuthCallbackConfigured(): bool

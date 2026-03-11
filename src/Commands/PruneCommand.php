@@ -23,9 +23,13 @@ final class PruneCommand extends Command
 
     public function handle(): int
     {
-        $days = $this->option('days') !== null
-            ? (int) $this->option('days')
-            : (int) config('conductor.prune_after_days', 7);
+        $days = $this->resolveRetentionDays();
+
+        if ($days === null) {
+            $this->error('The prune retention period must be a non-negative integer.');
+
+            return self::INVALID;
+        }
 
         $cutoff = now()->subDays($days);
 
@@ -61,5 +65,22 @@ final class PruneCommand extends Command
         );
 
         return self::SUCCESS;
+    }
+
+    private function resolveRetentionDays(): ?int
+    {
+        $rawDays = $this->option('days');
+
+        if ($rawDays === null) {
+            $rawDays = config('conductor.prune_after_days', 7);
+        }
+
+        $days = filter_var($rawDays, FILTER_VALIDATE_INT);
+
+        if ($days === false || $days < 0) {
+            return null;
+        }
+
+        return $days;
     }
 }

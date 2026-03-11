@@ -25,6 +25,13 @@ final class JobRetryTrackableJob implements ShouldQueue
     public function handle(): void {}
 }
 
+final class JobRetryUnexpectedJob implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public function handle(): void {}
+}
+
 it('retries a failed job', function (): void {
     $originalJob = new JobRetryTrackableJob();
     $encrypted = Crypt::encryptString(serialize($originalJob));
@@ -56,4 +63,22 @@ it('rejects retry on a non-failed job', function (): void {
     $retryService = app(JobRetryService::class);
 
     expect(fn () => $retryService->retry($conductorJob))->toThrow(InvalidArgumentException::class);
+});
+
+it('rejects retry payloads that do not match the stored job class', function (): void {
+    $encrypted = Crypt::encryptString(serialize(new JobRetryUnexpectedJob()));
+
+    $conductorJob = ConductorJob::factory()->failed()->create([
+        'class' => JobRetryTrackableJob::class,
+        'payload' => ['display' => [], 'retry' => $encrypted],
+        'queue' => 'default',
+        'connection' => 'sync',
+    ]);
+
+    $retryService = app(JobRetryService::class);
+
+    expect(fn () => $retryService->retry($conductorJob))->toThrow(
+        InvalidArgumentException::class,
+        'Retry payload does not match the stored job class.',
+    );
 });

@@ -25,9 +25,18 @@ final class JobRetryService
 
         $encrypted = (string) $payload['retry'];
         $serialized = Crypt::decryptString($encrypted);
+
+        if ($this->extractSerializedJobClass($serialized) !== $job->class) {
+            throw new InvalidArgumentException('Retry payload does not match the stored job class.');
+        }
+
         $originalJob = unserialize($serialized);
 
-        if (is_object($originalJob) && property_exists($originalJob, 'conductorJobId')) {
+        if (! is_object($originalJob) || $originalJob::class !== $job->class) {
+            throw new InvalidArgumentException('Retry payload could not be restored safely.');
+        }
+
+        if (property_exists($originalJob, 'conductorJobId')) {
             $originalJob->conductorJobId = $job->id;
         }
 
@@ -42,5 +51,14 @@ final class JobRetryService
         ]);
 
         dispatch($originalJob)->onQueue($job->queue)->onConnection($job->connection);
+    }
+
+    private function extractSerializedJobClass(string $serializedJob): ?string
+    {
+        if (! preg_match('/^O:\\d+:"([^"]+)":\\d+:/', $serializedJob, $matches)) {
+            return null;
+        }
+
+        return $matches[1];
     }
 }

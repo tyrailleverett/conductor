@@ -74,8 +74,6 @@ final class JobController
             $this->jobCancellationService->cancel($job);
         } catch (LogicException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
-        } catch (InvalidArgumentException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
         }
 
         return response()->json(['message' => 'Job cancellation requested.']);

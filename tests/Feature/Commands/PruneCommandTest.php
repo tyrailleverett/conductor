@@ -49,6 +49,14 @@ it('accepts a custom days option', function (): void {
     expect(ConductorJob::count())->toBe(1);
 });
 
+it('rejects a negative days option', function (): void {
+    ConductorJob::factory()->create(['created_at' => now()->subDays(10)]);
+
+    $this->artisan('conductor:prune', ['--days' => -1])->assertExitCode(2);
+
+    expect(ConductorJob::count())->toBe(1);
+});
+
 it('cascade deletes child records with jobs', function (): void {
     $job = ConductorJob::factory()->create(['created_at' => now()->subDays(10)]);
     ConductorJobLog::factory()->create(['job_id' => $job->id]);

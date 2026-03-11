@@ -35,12 +35,12 @@
 
 <body>
     <script>
-        window.__conductor__ = {!! json_encode([
-            'basePath' => (string) config('conductor.path', 'conductor'),
-        ]) !!};
+        window.__conductor__ =            {!! json_encode([
+    'basePath' => (string) config('conductor.path', 'conductor'),
+]) !!};
     </script>
     <div id="app"></div>
-    @if (! $assetsAvailable)
+    @if (!$assetsAvailable)
         <div style="font-family:sans-serif;padding:2rem;color:#ef4444;">
             <strong>Conductor assets not published.</strong>
             Run: <code>php artisan conductor:publish</code>
