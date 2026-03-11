@@ -4,20 +4,26 @@ declare(strict_types=1);
 
 namespace HotReloadStudios\Conductor;
 
+use HotReloadStudios\Conductor\Commands\PruneCommand;
+use HotReloadStudios\Conductor\Commands\PublishCommand;
+use HotReloadStudios\Conductor\Commands\StatusCommand;
 use HotReloadStudios\Conductor\Concerns\Trackable;
 use HotReloadStudios\Conductor\Enums\JobStatus;
 use HotReloadStudios\Conductor\Exceptions\JobCancelledException;
 use HotReloadStudios\Conductor\Http\Middleware\Authorize;
 use HotReloadStudios\Conductor\Http\Middleware\WebhookRateLimit;
+use HotReloadStudios\Conductor\Listeners\WorkerHeartbeatListener;
 use HotReloadStudios\Conductor\Logging\ConductorLogHandler;
 use HotReloadStudios\Conductor\Models\ConductorJob;
 use HotReloadStudios\Conductor\Services\EventDispatchService;
 use HotReloadStudios\Conductor\Services\JobCancellationService;
 use HotReloadStudios\Conductor\Services\JobRetryService;
+use HotReloadStudios\Conductor\Services\MetricSnapshotService;
 use HotReloadStudios\Conductor\Services\PayloadRedactor;
 use HotReloadStudios\Conductor\Services\ScheduleRegistrar;
 use HotReloadStudios\Conductor\Services\ScheduleToggleService;
 use HotReloadStudios\Conductor\Services\WebhookVerifier;
+use HotReloadStudios\Conductor\Services\WorkerHeartbeatService;
 use HotReloadStudios\Conductor\Services\WorkflowCancellationService;
 use HotReloadStudios\Conductor\Services\WorkflowEngine;
 use HotReloadStudios\Conductor\Support\ConductorContext;
@@ -25,8 +31,11 @@ use Illuminate\Console\Scheduling\Schedule as LaravelSchedule;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Queue\Events\Looping;
+use Illuminate\Queue\Events\WorkerStopping;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Route;
@@ -56,7 +65,13 @@ final class ConductorServiceProvider extends PackageServiceProvider
                 'create_conductor_webhook_logs_table',
                 'create_conductor_metric_snapshots_table',
             ])
-            ->hasRoute('web');
+            ->hasRoute('web')
+            ->hasCommands([PruneCommand::class, StatusCommand::class, PublishCommand::class]);
+
+        $this->publishes(
+            [__DIR__.'/../resources/dist' => public_path('vendor/conductor')],
+            'conductor-assets',
+        );
     }
 
     public function packageRegistered(): void
@@ -71,6 +86,8 @@ final class ConductorServiceProvider extends PackageServiceProvider
         $this->app->singleton(ScheduleRegistrar::class);
         $this->app->singleton(ScheduleToggleService::class);
         $this->app->singleton(WebhookVerifier::class);
+        $this->app->singleton(WorkerHeartbeatService::class);
+        $this->app->singleton(MetricSnapshotService::class);
     }
 
     public function packageBooted(): void
@@ -88,13 +105,25 @@ final class ConductorServiceProvider extends PackageServiceProvider
         }
 
         $this->registerQueueListeners();
+        $this->registerWorkerHeartbeatListeners();
 
         // Register the log handler once — it self-guards via ConductorContext::isActive().
         $this->registerLogHandler();
 
         $this->app->afterResolving(LaravelSchedule::class, function (LaravelSchedule $schedule): void {
             app(ScheduleRegistrar::class)->register($schedule);
+            $schedule->command('conductor:prune')->daily();
+            $schedule->call(fn () => app(MetricSnapshotService::class)->capture())->everyMinute();
         });
+    }
+
+    private function registerWorkerHeartbeatListeners(): void
+    {
+        Event::listen(Looping::class, [WorkerHeartbeatListener::class, 'handleLooping']);
+        Event::listen(JobProcessing::class, [WorkerHeartbeatListener::class, 'handleJobProcessing']);
+        Event::listen(JobProcessed::class, [WorkerHeartbeatListener::class, 'handleJobProcessed']);
+        Event::listen(JobFailed::class, [WorkerHeartbeatListener::class, 'handleJobFailed']);
+        Event::listen(WorkerStopping::class, [WorkerHeartbeatListener::class, 'handleWorkerStopping']);
     }
 
     private function registerLogHandler(): void
