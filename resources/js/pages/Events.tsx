@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { apiGet } from '@/lib/api';
 import { formatRelativeTime } from '@/lib/utils';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Search } from 'lucide-react';
 import type { ConductorEvent, PaginatedResponse } from '@/types';
 
 export default function Events() {
@@ -33,19 +33,23 @@ export default function Events() {
     }, [nameFilter, page]);
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-5">
             <div>
-                <h1 className="text-lg font-semibold">Events</h1>
-                <p className="text-sm text-[var(--muted-foreground)]">{meta.total.toLocaleString()} total</p>
+                <h1 className="text-xl font-semibold text-[var(--foreground)]">Events</h1>
+                <p className="text-sm text-[var(--muted-foreground)]">Browse all dispatched events</p>
             </div>
 
-            <input
-                type="text"
-                placeholder="Filter by event name..."
-                className="rounded-md border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]"
-                value={nameFilter}
-                onChange={(e) => { setNameFilter(e.target.value); setPage(1); }}
-            />
+            {/* Search input with icon */}
+            <div className="relative w-72">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--muted-foreground)]" />
+                <input
+                    type="text"
+                    placeholder="Filter by event name..."
+                    className="w-full rounded-md border border-[var(--border)] bg-[var(--card)] pl-8 pr-3 py-1.5 font-mono text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--ring)]"
+                    value={nameFilter}
+                    onChange={(e) => { setNameFilter(e.target.value); setPage(1); }}
+                />
+            </div>
 
             {loading ? (
                 <div className="space-y-2">
@@ -53,29 +57,35 @@ export default function Events() {
                 </div>
             ) : (
                 <>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Runs</TableHead>
-                                <TableHead>Dispatched</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {events.length === 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={3} className="text-center text-[var(--muted-foreground)]">No events found.</TableCell>
-                                </TableRow>
-                            )}
-                            {events.map((event) => (
-                                <TableRow key={event.id} className="cursor-pointer" onClick={() => { navigate(`/events/${event.id}`); }}>
-                                    <TableCell className="font-mono text-xs">{event.name}</TableCell>
-                                    <TableCell>{event.runs_count}</TableCell>
-                                    <TableCell className="text-[var(--muted-foreground)]">{formatRelativeTime(event.dispatched_at)}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                    <div className="rounded-lg border border-[var(--border)] overflow-hidden">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-[var(--border)]">
+                                    <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Event Name</th>
+                                    <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Runs</th>
+                                    <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Dispatched</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {events.length === 0 && (
+                                    <tr>
+                                        <td colSpan={3} className="px-4 py-6 text-center text-[var(--muted-foreground)]">No events found.</td>
+                                    </tr>
+                                )}
+                                {events.map((event) => (
+                                    <tr
+                                        key={event.id}
+                                        className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--muted)]/30 cursor-pointer transition-colors"
+                                        onClick={() => { navigate(`/events/${event.id}`); }}
+                                    >
+                                        <td className="px-4 py-3 font-mono text-sm text-[var(--foreground)]">{event.name}</td>
+                                        <td className="px-4 py-3 text-[var(--foreground)]">{event.runs_count}</td>
+                                        <td className="px-4 py-3 text-[var(--muted-foreground)]">{formatRelativeTime(event.dispatched_at)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                     <Pagination currentPage={meta.current_page} lastPage={meta.last_page} onPageChange={setPage} />
                 </>
             )}

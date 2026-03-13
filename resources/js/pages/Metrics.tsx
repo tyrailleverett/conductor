@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { apiGet } from '@/lib/api';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { SimpleTabs } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
     LineChart,
@@ -17,13 +15,10 @@ import {
 } from 'recharts';
 import type { MetricsResponse, MetricPoint } from '@/types';
 
-const WINDOW_TABS = [
-    { value: '1h', label: '1h' },
-    { value: '24h', label: '24h' },
-    { value: '7d', label: '7d' },
-];
+const WINDOW_OPTIONS = ['1h', '24h', '7d'] as const;
+type WindowOption = typeof WINDOW_OPTIONS[number];
 
-function formatTime(iso: string, window: string): string {
+function formatTime(iso: string, window: WindowOption): string {
     const d = new Date(iso);
     if (window === '7d') {
         return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -31,8 +26,19 @@ function formatTime(iso: string, window: string): string {
     return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 }
 
+const COLORS = ['#4ade80', '#60a5fa', '#f59e0b', '#f87171', '#a78bfa'];
+
+function ChartPanel({ title, children }: { title: string; children: React.ReactNode }) {
+    return (
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5">
+            <p className="mb-4 text-sm font-medium text-[var(--foreground)]">{title}</p>
+            {children}
+        </div>
+    );
+}
+
 export default function Metrics() {
-    const [window, setWindow] = useState<'1h' | '24h' | '7d'>('1h');
+    const [window, setWindow] = useState<WindowOption>('1h');
     const [metrics, setMetrics] = useState<MetricsResponse | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -64,85 +70,88 @@ export default function Metrics() {
         })
         : [];
 
-    const COLORS = ['#4ade80', '#60a5fa', '#f59e0b', '#f87171', '#a78bfa'];
+    const tickStyle = { fill: 'var(--muted-foreground)', fontSize: 11 };
+    const tooltipStyle = { background: 'var(--popover)', border: '1px solid var(--border)', color: 'var(--foreground)', fontSize: 12 };
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
+        <div className="space-y-5">
+            <div className="flex items-start justify-between">
                 <div>
-                    <h1 className="text-lg font-semibold">Metrics</h1>
-                    <p className="text-sm text-[var(--muted-foreground)]">Job throughput and queue health</p>
+                    <h1 className="text-xl font-semibold text-[var(--foreground)]">Metrics</h1>
+                    <p className="text-sm text-[var(--muted-foreground)]">System performance over time</p>
                 </div>
-                <SimpleTabs
-                    tabs={WINDOW_TABS}
-                    value={window}
-                    onValueChange={(v) => { setWindow(v as '1h' | '24h' | '7d'); }}
-                />
+                {/* Segmented window picker */}
+                <div className="flex items-center rounded-md border border-[var(--border)] overflow-hidden">
+                    {WINDOW_OPTIONS.map((opt) => (
+                        <button
+                            key={opt}
+                            className={`px-3 py-1.5 text-sm font-mono transition-colors ${
+                                window === opt
+                                    ? 'bg-[var(--foreground)] text-[var(--background)]'
+                                    : 'bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
+                            }`}
+                            onClick={() => { setWindow(opt); }}
+                        >
+                            {opt}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {loading ? (
                 <div className="space-y-4">
-                    <Skeleton className="h-48 rounded-lg" />
-                    <Skeleton className="h-48 rounded-lg" />
-                    <Skeleton className="h-48 rounded-lg" />
+                    <Skeleton className="h-56 rounded-lg" />
+                    <Skeleton className="h-56 rounded-lg" />
+                    <Skeleton className="h-56 rounded-lg" />
                 </div>
             ) : (
-                <div className="space-y-6">
-                    <Card>
-                        <CardHeader><CardTitle>Throughput (jobs completed)</CardTitle></CardHeader>
-                        <CardContent>
-                            <ResponsiveContainer width="100%" height={200}>
-                                <LineChart data={throughputData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                                    <XAxis dataKey="time" tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} />
-                                    <YAxis tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} />
-                                    <Tooltip contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', color: 'var(--foreground)' }} />
-                                    <Line type="monotone" dataKey="value" stroke="#4ade80" strokeWidth={2} dot={false} name="Jobs" />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
+                <div className="space-y-5">
+                    <ChartPanel title="Throughput (jobs / min)">
+                        <ResponsiveContainer width="100%" height={220}>
+                            <LineChart data={throughputData}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                                <XAxis dataKey="time" tick={tickStyle} />
+                                <YAxis tick={tickStyle} />
+                                <Tooltip contentStyle={tooltipStyle} />
+                                <Line type="monotone" dataKey="value" stroke="#4ade80" strokeWidth={2} dot={false} name="Jobs" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </ChartPanel>
 
-                    <Card>
-                        <CardHeader><CardTitle>Failure Rate (%)</CardTitle></CardHeader>
-                        <CardContent>
-                            <ResponsiveContainer width="100%" height={200}>
-                                <LineChart data={failureData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                                    <XAxis dataKey="time" tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} />
-                                    <YAxis tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} />
-                                    <Tooltip contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', color: 'var(--foreground)' }} />
-                                    <Line type="monotone" dataKey="value" stroke="#f87171" strokeWidth={2} dot={false} name="Failure %" />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
+                    <ChartPanel title="Failure Rate (%)">
+                        <ResponsiveContainer width="100%" height={220}>
+                            <LineChart data={failureData}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                                <XAxis dataKey="time" tick={tickStyle} />
+                                <YAxis tick={tickStyle} />
+                                <Tooltip contentStyle={tooltipStyle} />
+                                <Line type="monotone" dataKey="value" stroke="#f87171" strokeWidth={2} dot={false} name="Failure %" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </ChartPanel>
 
                     {queueKeys.length > 0 && (
-                        <Card>
-                            <CardHeader><CardTitle>Queue Depth (pending jobs)</CardTitle></CardHeader>
-                            <CardContent>
-                                <ResponsiveContainer width="100%" height={200}>
-                                    <AreaChart data={queueData}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                                        <XAxis dataKey="time" tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} />
-                                        <YAxis tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} />
-                                        <Tooltip contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', color: 'var(--foreground)' }} />
-                                        <Legend />
-                                        {queueKeys.map((q, i) => (
-                                            <Area
-                                                key={q}
-                                                type="monotone"
-                                                dataKey={q}
-                                                stackId="1"
-                                                stroke={COLORS[i % COLORS.length]}
-                                                fill={`${COLORS[i % COLORS.length]}33`}
-                                            />
-                                        ))}
-                                    </AreaChart>
-                                </ResponsiveContainer>
-                            </CardContent>
-                        </Card>
+                        <ChartPanel title="Queue Depth">
+                            <ResponsiveContainer width="100%" height={220}>
+                                <AreaChart data={queueData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                                    <XAxis dataKey="time" tick={tickStyle} />
+                                    <YAxis tick={tickStyle} />
+                                    <Tooltip contentStyle={tooltipStyle} />
+                                    <Legend wrapperStyle={{ fontSize: 12, color: 'var(--muted-foreground)' }} />
+                                    {queueKeys.map((q, i) => (
+                                        <Area
+                                            key={q}
+                                            type="monotone"
+                                            dataKey={q}
+                                            stackId="1"
+                                            stroke={COLORS[i % COLORS.length]}
+                                            fill={`${COLORS[i % COLORS.length]}33`}
+                                        />
+                                    ))}
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </ChartPanel>
                     )}
                 </div>
             )}

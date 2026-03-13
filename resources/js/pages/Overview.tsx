@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { apiGet } from '@/lib/api';
-import { formatRelativeTime, formatDuration } from '@/lib/utils';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { formatRelativeTime } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Layers, XCircle, GitFork, CheckCircle2 } from 'lucide-react';
 import type { PaginatedResponse, ConductorEvent, ConductorJob, ConductorWorkflow, MetricsResponse } from '@/types';
 
 interface OverviewStats {
@@ -19,7 +18,20 @@ interface ActivityItem {
     label: string;
     status: string;
     timestamp: string;
-    durationMs: number | null;
+}
+
+function StatusDot({ status }: { status: string }) {
+    const color =
+        status === 'completed' ? 'bg-green-400 text-green-400'
+        : status === 'failed' ? 'bg-red-400 text-red-400'
+        : status === 'running' ? 'bg-amber-400 text-amber-400'
+        : 'bg-zinc-500 text-zinc-400';
+    return (
+        <span className="flex items-center gap-1.5">
+            <span className={`inline-block h-2 w-2 rounded-full ${color.split(' ')[0]}`} />
+            <span className={`capitalize ${color.split(' ')[1]}`}>{status}</span>
+        </span>
+    );
 }
 
 export default function Overview() {
@@ -50,7 +62,6 @@ export default function Overview() {
                         label: job.display_name,
                         status: job.status,
                         timestamp: job.created_at,
-                        durationMs: job.duration_ms,
                     })),
                     ...eventsRes.data.map<ActivityItem>((event) => ({
                         id: `event-${event.id}`,
@@ -58,10 +69,9 @@ export default function Overview() {
                         label: event.name,
                         status: 'event',
                         timestamp: event.dispatched_at,
-                        durationMs: null,
                     })),
                 ]
-                    .sort((leftItem, rightItem) => new Date(rightItem.timestamp).getTime() - new Date(leftItem.timestamp).getTime())
+                    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
                     .slice(0, 10);
 
                 setStats({
@@ -95,59 +105,64 @@ export default function Overview() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-lg font-semibold">Overview</h1>
-                <p className="text-sm text-[var(--muted-foreground)]">Queue worker activity at a glance</p>
+                <h1 className="text-xl font-semibold text-[var(--foreground)]">Overview</h1>
+                <p className="text-sm text-[var(--muted-foreground)]">System summary and recent activity</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <StatCard label="Total Jobs" value={stats?.totalJobs ?? 0} icon="⚡" />
-                <StatCard label="Failed Jobs" value={stats?.failedJobs ?? 0} icon="✕" valueClass="text-red-400" />
-                <StatCard label="Active Workflows" value={stats?.activeWorkflows ?? 0} icon="⇄" valueClass="text-amber-400" />
-                <StatCard label="Queue Depth" value={stats?.queueDepth ?? 0} icon="☰" />
+                <StatCard label="Total Jobs" value={stats?.totalJobs ?? 0} icon={<Layers className="h-5 w-5 text-zinc-500" />} />
+                <StatCard label="Failed Jobs" value={stats?.failedJobs ?? 0} icon={<XCircle className="h-5 w-5 text-red-400" />} valueClass="text-[var(--foreground)]" />
+                <StatCard label="Active Workflows" value={stats?.activeWorkflows ?? 0} icon={<GitFork className="h-5 w-5 text-zinc-500" />} />
+                <StatCard label="Queue Depth" value={stats?.queueDepth ?? 0} icon={<CheckCircle2 className="h-5 w-5 text-zinc-500" />} />
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-2">
-                        {activityItems.length === 0 && (
-                            <p className="text-sm text-[var(--muted-foreground)]">No recent activity.</p>
-                        )}
-                        {activityItems.map((item) => (
-                            <div key={item.id} className="flex items-center justify-between border-b border-[var(--border)] py-2 last:border-0">
-                                <div className="flex items-center gap-3">
-                                    {item.kind === 'job' ? (
-                                        <Badge variant="status" status={item.status}>{item.status}</Badge>
-                                    ) : (
-                                        <Badge>event</Badge>
-                                    )}
-                                    <span className="font-mono text-xs text-[var(--foreground)]">{item.label}</span>
-                                </div>
-                                <div className="flex items-center gap-4 text-xs text-[var(--muted-foreground)]">
-                                    {item.durationMs !== null && <span>{formatDuration(item.durationMs)}</span>}
-                                    <span>{formatRelativeTime(item.timestamp)}</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
+            <div>
+                <h2 className="mb-3 text-sm font-medium text-[var(--foreground)]">Recent Activity</h2>
+                <div className="rounded-lg border border-[var(--border)] overflow-hidden">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b border-[var(--border)]">
+                                <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Name</th>
+                                <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Status</th>
+                                <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Type</th>
+                                <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {activityItems.length === 0 && (
+                                <tr>
+                                    <td colSpan={4} className="px-4 py-6 text-center text-[var(--muted-foreground)]">No recent activity.</td>
+                                </tr>
+                            )}
+                            {activityItems.map((item, idx) => (
+                                <tr
+                                    key={item.id}
+                                    className={`border-b border-[var(--border)] last:border-0 hover:bg-[var(--muted)]/30 transition-colors ${idx % 2 === 0 ? '' : ''}`}
+                                >
+                                    <td className="px-4 py-3 font-mono text-sm text-[var(--foreground)]">{item.label}</td>
+                                    <td className="px-4 py-3">
+                                        <StatusDot status={item.status} />
+                                    </td>
+                                    <td className="px-4 py-3 text-[var(--muted-foreground)] capitalize">{item.kind}</td>
+                                    <td className="px-4 py-3 text-[var(--muted-foreground)]">{formatRelativeTime(item.timestamp)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     );
 }
 
-function StatCard({ label, value, icon, valueClass = '' }: { label: string; value: number; icon: string; valueClass?: string }) {
+function StatCard({ label, value, icon, valueClass = '' }: { label: string; value: number; icon: React.ReactNode; valueClass?: string }) {
     return (
-        <Card>
-            <CardContent className="pt-4">
-                <div className="flex items-center justify-between">
-                    <span className="text-xs text-[var(--muted-foreground)]">{icon}</span>
-                </div>
-                <div className={`mt-2 text-2xl font-bold ${valueClass}`}>{value.toLocaleString()}</div>
-                <p className="text-xs text-[var(--muted-foreground)] mt-1">{label}</p>
-            </CardContent>
-        </Card>
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5">
+            <div className="flex items-center justify-between mb-3">
+                {icon}
+            </div>
+            <div className={`text-3xl font-bold text-[var(--foreground)] ${valueClass}`}>{value.toLocaleString()}</div>
+            <p className="text-xs text-[var(--muted-foreground)] mt-1">{label}</p>
+        </div>
     );
 }
