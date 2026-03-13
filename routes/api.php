@@ -7,6 +7,7 @@ use HotReloadStudios\Conductor\Http\Controllers\Api\JobController;
 use HotReloadStudios\Conductor\Http\Controllers\Api\JobStreamController;
 use HotReloadStudios\Conductor\Http\Controllers\Api\MetricsController;
 use HotReloadStudios\Conductor\Http\Controllers\Api\ScheduleController;
+use HotReloadStudios\Conductor\Http\Controllers\Api\WebhookController;
 use HotReloadStudios\Conductor\Http\Controllers\Api\WorkerController;
 use HotReloadStudios\Conductor\Http\Controllers\Api\WorkflowController;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,8 @@ Route::delete('workflows/{workflow}', [WorkflowController::class, 'destroy'])->n
 
 Route::get('events', [EventController::class, 'index'])->name('conductor.api.events.index');
 Route::get('events/{event}', [EventController::class, 'show'])->name('conductor.api.events.show');
+
+Route::get('webhooks', [WebhookController::class, 'index'])->name('conductor.api.webhooks.index');
 
 Route::get('schedules', [ScheduleController::class, 'index'])->name('conductor.api.schedules.index');
 Route::post('schedules/{schedule}/toggle', [ScheduleController::class, 'toggle'])->name('conductor.api.schedules.toggle');

@@ -206,6 +206,52 @@ Full documentation is in the [`docs/`](docs/) directory:
 | [API Reference](docs/api.md) | All JSON API endpoints |
 | [Advanced Topics](docs/advanced.md) | PHP-FPM/Octane caveats, payload redaction, upgrading |
 
+## Screenshots
+
+### Overview
+
+![Conductor overview](docs/screenshots/overview.png)
+
+### Jobs
+
+![Conductor jobs](docs/screenshots/jobs.png)
+
+### Job Detail
+
+![Conductor job detail](docs/screenshots/job-detail.png)
+
+### Workflows
+
+![Conductor workflows](docs/screenshots/workflows.png)
+
+### Workflow Detail
+
+![Conductor workflow detail](docs/screenshots/workflow-detail.png)
+
+### Events
+
+![Conductor events](docs/screenshots/events.png)
+
+### Event Detail
+
+![Conductor event detail](docs/screenshots/event-detail.png)
+
+### Webhooks
+
+![Conductor webhooks](docs/screenshots/webhooks.png)
+
+### Schedules
+
+![Conductor schedules](docs/screenshots/schedules.png)
+
+### Metrics
+
+![Conductor metrics](docs/screenshots/metrics.png)
+
+### Queues
+
+![Conductor queues](docs/screenshots/queues.png)
+
 ---
 
 ## Dashboard Development

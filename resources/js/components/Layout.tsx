@@ -7,6 +7,7 @@ const navItems = [
     { to: '/jobs', label: 'Jobs', icon: '⚡', end: false },
     { to: '/workflows', label: 'Workflows', icon: '⇄', end: false },
     { to: '/events', label: 'Events', icon: '◎', end: false },
+    { to: '/webhooks', label: 'Webhooks', icon: '↗', end: false },
     { to: '/schedules', label: 'Schedules', icon: '◷', end: false },
     { to: '/metrics', label: 'Metrics', icon: '▲', end: false },
     { to: '/queues', label: 'Queues', icon: '☰', end: false },

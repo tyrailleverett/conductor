@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use ReflectionProperty;
 use Spatie\LaravelPackageTools\Package;
@@ -117,6 +118,10 @@ final class ConductorServiceProvider extends PackageServiceProvider
         $this->registerLogHandler();
 
         $this->app->afterResolving(LaravelSchedule::class, function (LaravelSchedule $schedule): void {
+            if (! Schema::hasTable('conductor_schedules')) {
+                return;
+            }
+
             app(ScheduleRegistrar::class)->register($schedule);
             $schedule->command('conductor:prune')->daily();
             $schedule->call(fn () => app(MetricSnapshotService::class)->capture())->everyMinute();

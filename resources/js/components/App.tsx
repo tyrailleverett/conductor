@@ -8,6 +8,7 @@ import Workflows from '@/pages/Workflows';
 import WorkflowDetail from '@/pages/WorkflowDetail';
 import Events from '@/pages/Events';
 import EventDetail from '@/pages/EventDetail';
+import Webhooks from '@/pages/Webhooks';
 import Schedules from '@/pages/Schedules';
 import Metrics from '@/pages/Metrics';
 import Queues from '@/pages/Queues';
@@ -26,6 +27,7 @@ export default function App() {
                     <Route path="workflows/:id" element={<WorkflowDetail />} />
                     <Route path="events" element={<Events />} />
                     <Route path="events/:id" element={<EventDetail />} />
+                    <Route path="webhooks" element={<Webhooks />} />
                     <Route path="schedules" element={<Schedules />} />
                     <Route path="metrics" element={<Metrics />} />
                     <Route path="queues" element={<Queues />} />
